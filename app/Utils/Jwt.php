@@ -1,0 +1,92 @@
+<?php
+
+namespace App\Utils;
+
+use App\Services\UsuarioService;
+use App\Utils\ManejoData;
+
+class Jwt
+{
+    protected $usuarioService;
+
+    public function __construct()
+    {
+        $this->usuarioService = new UsuarioService();
+    }
+
+    public function verificarToken($authorization, $secret)
+    {
+        $devolucion = [];
+        $token = substr($authorization, 7);
+        $parts = explode('.', $token);
+        [$headerB64, $payloadB64, $signatureB64] = $parts;
+
+        $payload = json_decode($this->base64url_decode($payloadB64), true);
+        $signature = hash_hmac('sha256', "$headerB64.$payloadB64", $secret, true);
+        $signatureCheckB64 = $this->base64url_encode($signature);
+
+        if (!$authorization || !str_starts_with($authorization, 'Bearer ')) {
+            $devolucion = ManejoData::armarDevolucion(401, false, 'Token no proporcionado Bearer', null, 'token autenticacion');
+        } elseif (count($parts) !== 3) {
+            $devolucion = ManejoData::armarDevolucion(401, false, 'Token inválido', null, 'token autenticacion');
+        } elseif (!hash_equals($signatureCheckB64, $signatureB64)) {
+            $devolucion = ManejoData::armarDevolucion(401, false, 'Firma inválida', null, 'token autenticacion');
+        } elseif (!$payload || $payload['exp'] < time()) {
+            $devolucion = ManejoData::armarDevolucion(401, false, 'Token expirado', null, 'token autenticacion');
+        } else {
+            $user = $this->usuarioService->obtenerXId($payload['sub']);
+            if (!$user) {
+                $devolucion = ManejoData::armarDevolucion(401, false, 'Usuario no encontrado', null, 'token autenticacion');
+            } else {
+                $devolucion = ManejoData::armarDevolucion(200, true, 'Usuario encontrado', $user);
+            }
+        }
+
+        return $devolucion;
+    }
+
+    private function base64url_decode($data)
+    {
+        $remainder = strlen($data) % 4;
+        if ($remainder) {
+            $data .= str_repeat('=', 4 - $remainder);
+        }
+        return base64_decode(strtr($data, '-_', '+/'));
+    }
+
+    private function base64url_encode($data)
+    {
+        return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+    }
+
+    public function generateJWT($payload, $secret)
+    {
+        $header = ['alg' => 'HS256', 'typ' => 'JWT'];
+
+        $base64UrlHeader = $this->base64url_encode(json_encode($header));
+        $base64UrlPayload = $this->base64url_encode(json_encode($payload));
+
+        $signature = hash_hmac('sha256', "$base64UrlHeader.$base64UrlPayload", $secret, true);
+        $base64UrlSignature = $this->base64url_encode($signature);
+
+        return "$base64UrlHeader.$base64UrlPayload.$base64UrlSignature";
+    }
+
+    public function renovarToken($refreshToken)
+    {
+        $verificaJwt = $this->verificarToken($refreshToken, config('services.jwt_secret_refresh'));
+        if ($verificaJwt['success']) {
+            return $this->generateToken($verificaJwt);
+        }
+    }
+
+    public function generateToken($verificaJwt)
+    {
+        $payload1 = ManejoData::generarPayload($verificaJwt, time() + (15 * 60));
+        $payload2 = ManejoData::generarPayload($verificaJwt, time() + (7 * 24 * 60 * 60));
+        return [
+            'access_token' => $this->generateJWT($payload1, config('services.jwt_secret')),
+            'refresh_token' => $this->generateJWT($payload2, config('services.jwt_secret_refresh'))
+        ];
+    }
+}
