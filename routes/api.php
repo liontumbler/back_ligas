@@ -11,8 +11,6 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-//Route::apiResource('licencias', LicenciasController::class);
-//Route::apiResource('usuarios', UsuariosController::class);
 Route::middleware(['VerificaLicencia', 'JWT'])->group(function () {
     Route::apiResource('licencias', LicenciasController::class);
     Route::apiResource('ligas', LigasController::class);
