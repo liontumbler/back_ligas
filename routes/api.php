@@ -1,15 +1,10 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\V1\LigasController;
 use App\Http\Controllers\Api\V1\UsuariosController;
 use App\Http\Controllers\Api\V1\LicenciasController;
-
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
 
 Route::middleware(['VerificaLicencia', 'JWT'])->group(function () {
     Route::apiResource('licencias', LicenciasController::class);
