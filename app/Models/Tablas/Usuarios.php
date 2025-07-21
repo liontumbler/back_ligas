@@ -51,4 +51,14 @@ class Usuarios extends Model
     {
         return $this->hasMany(self::class, 'usuario_modificacion');
     }
+
+    public function rol()
+    {
+        return $this->belongsTo(Roles::class, 'rol_id');
+    }
+
+    public function permisos()
+    {
+        return $this->rol ? $this->rol->permisos() : collect();
+    }
 }

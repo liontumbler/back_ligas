@@ -36,7 +36,10 @@ class UsuarioService
     public function eliminarUsuario($id)
     {
         $objetoUsuario = Usuarios::find($id);
-        $objetoUsuario->delete();
+        if ($objetoUsuario) {
+            $objetoUsuario->delete();
+        }
+
         return $objetoUsuario;
     }
 

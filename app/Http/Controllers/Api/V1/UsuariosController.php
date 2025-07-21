@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Tablas\RefreshTokens;
 use Illuminate\Http\Request;
 use Exception;
 use App\Utils\ManejoData;
@@ -10,10 +11,12 @@ use App\Utils\Jwt;
 use Illuminate\Support\Facades\Hash;
 
 use App\Services\UsuarioService;
+use App\Services\RefreshTokenService;
 
 class UsuariosController extends Controller
 {
     protected $usuarioService;
+    protected $refreshTokenService;
     protected $jwt;
     protected $arregloRetorno = [];
 
@@ -34,6 +37,7 @@ class UsuariosController extends Controller
     public function __construct()
     {
         $this->usuarioService = new UsuarioService();
+        $this->refreshTokenService = new RefreshTokenService();
         $this->jwt = new Jwt();
     }
 
@@ -128,17 +132,56 @@ class UsuariosController extends Controller
                 'correo' => 'required|string|email|max:20',
                 'password' => 'required|string|max:20'
             ]);
-            
+
             $datos = $this->usuarioService->obtenerXcorreo($data['correo']);
             if ($datos !== null) {
                 if (Hash::check($data['password'], $datos['password'])) {
                     $token = $this->jwt->generateToken($datos);
-                    $this->arregloRetorno = ManejoData::armarDevolucion(200, true, "Login ok", $token);
+                    $tokenRefresh = [
+                        'usuario_id' => $datos->id,
+                        'refresh_token' => $token['refresh_token'],
+                        'ip_address' => $request->getClientIp(),//$request->ip(),
+                        'usuario_agent' => $request->header('User-Agent'),
+                    ];
+                    $resToken = $this->refreshTokenService->crearRefreshToken($tokenRefresh);
+                    if ($resToken) {
+                        $this->arregloRetorno = ManejoData::armarDevolucion(200, true, "Login ok", $token);
+                    } else {
+                        $this->arregloRetorno = ManejoData::armarDevolucion(400, false, "error insercion token", null, 'token refresh');
+                    }
                 } else {
-                    $this->arregloRetorno = ManejoData::armarDevolucion(400, true, "datos incorrectos", [], 'datos incorrectos');
+                    $this->arregloRetorno = ManejoData::armarDevolucion(400, true, "datos incorrectos", null, 'datos incorrectos');
                 }
             } else {
-                $this->arregloRetorno = ManejoData::armarDevolucion(400, true, "datos incorrectos", [], 'datos incorrectos');
+                $this->arregloRetorno = ManejoData::armarDevolucion(400, true, "datos incorrectos", null, 'datos incorrectos');
+            }
+        } catch (Exception $e) {
+            $this->arregloRetorno = ManejoData::armarDevolucion(500, false, "Error inesperado", null,  ManejoData::verificarExcepciones($e));
+        } finally {
+            return response()->json($this->arregloRetorno, $this->arregloRetorno['code']);
+        }
+    }
+
+    public function logout(Request $request)
+    {
+        try {
+            $authorization = $request->header('Authorization');
+            $refreshToken = '';
+            
+            if ($authorization && str_starts_with($authorization, 'Bearer ')) {
+                $refreshToken = substr($authorization, 7);
+            } 
+
+            $token = $this->refreshTokenService->obtenerXRefreshToken($refreshToken);
+            
+            if (!$refreshToken) {
+                $this->arregloRetorno = ManejoData::armarDevolucion(400, false, "Refresh token requerido", null, 'refresh_token');
+            } elseif (!$token) {
+                $this->arregloRetorno = ManejoData::armarDevolucion(404, false, "Token no encontrado", null, 'refresh_token');
+            } else {
+                $this->arregloRetorno = ManejoData::armarDevolucion(200, true, "Sesión cerrada correctamente", null);
+                $token->revoked = true;
+                $token->save();
             }
         } catch (Exception $e) {
             $this->arregloRetorno = ManejoData::armarDevolucion(500, false, "Error inesperado", null,  ManejoData::verificarExcepciones($e));

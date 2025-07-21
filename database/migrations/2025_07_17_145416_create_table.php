@@ -26,6 +26,13 @@ return new class extends Migration
             $table->timestamp('fecha_modificacion')->nullable();
         });
 
+        Schema::create('roles', function (Blueprint $table) {
+            $table->id();
+            $table->string('nombre', 100)->unique();
+            $table->timestamp('fecha_creacion')->nullable();
+            $table->timestamp('fecha_modificacion')->nullable();
+        });
+
         Schema::create('usuarios', function (Blueprint $table) {
             $table->id();
             $table->string('nombres', 100);
@@ -33,6 +40,7 @@ return new class extends Migration
             $table->string('correo', 20)->unique();
             $table->string('password', 200);
             $table->foreignId('liga_id')->nullable()->constrained('ligas')->onDelete('cascade');
+            $table->foreignId('rol_id')->constrained('roles')->onDelete('cascade');
             $table->foreignId('usuario_creacion')->nullable()->constrained('usuarios');
             $table->foreignId('usuario_modificacion')->nullable()->constrained('usuarios');
             $table->timestamp('fecha_creacion')->nullable();
@@ -93,9 +101,10 @@ return new class extends Migration
             $table->timestamp('fecha_modificacion')->nullable();
         });
 
-        Schema::create('roles', function (Blueprint $table) {
+        Schema::create('menus', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre')->unique();
+            $table->string('nombre', 100);
+            $table->foreignId('parent_id')->nullable()->constrained('menus')->onDelete('cascade');
             $table->foreignId('usuario_creacion')->nullable()->constrained('usuarios');
             $table->foreignId('usuario_modificacion')->nullable()->constrained('usuarios');
             $table->timestamp('fecha_creacion')->nullable();
@@ -104,7 +113,8 @@ return new class extends Migration
 
         Schema::create('permisos', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre')->unique();
+            $table->foreignId('menu_id')->constrained('menus')->onDelete('cascade');
+            $table->enum('action', ['view', 'create', 'update', 'delete', 'read']);
             $table->foreignId('usuario_creacion')->nullable()->constrained('usuarios');
             $table->foreignId('usuario_modificacion')->nullable()->constrained('usuarios');
             $table->timestamp('fecha_creacion')->nullable();
@@ -119,6 +129,8 @@ return new class extends Migration
             $table->foreignId('usuario_modificacion')->nullable()->constrained('usuarios');
             $table->timestamp('fecha_creacion')->nullable();
             $table->timestamp('fecha_modificacion')->nullable();
+
+            $table->unique(['rol_id', 'permiso_id']);
         });
 
         Schema::create('licencias', function (Blueprint $table) {
@@ -133,6 +145,20 @@ return new class extends Migration
             $table->timestamp('fecha_creacion')->nullable();
             $table->timestamp('fecha_modificacion')->nullable();
         });
+
+        Schema::create('refresh_tokens', function (Blueprint $table) {
+            $table->id();
+            $table->string('refresh_token');
+            $table->string('ip_address')->nullable();
+            $table->string('usuario_agent')->nullable();
+            $table->boolean('revoked')->default(false);
+            $table->timestamp('fecha_creacion')->nullable();
+            $table->timestamp('fecha_modificacion')->nullable();
+
+            $table->foreignId('usuario_id')->constrained('usuarios')->onDelete('cascade');
+
+            $table->index('refresh_token');
+        });
     }
 
     /**
@@ -140,15 +166,18 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('entrenos');
-        Schema::dropIfExists('mensualidades');
         Schema::dropIfExists('licencias');
-        Schema::dropIfExists('permiso_rol');
-        Schema::dropIfExists('roles');
-        Schema::dropIfExists('permisos');
-        Schema::dropIfExists('pagos');
-        Schema::dropIfExists('clientes');
-        Schema::dropIfExists('usuarios');
-        Schema::dropIfExists('ligas');
+        Schema::dropIfExists('entrenos');              
+        Schema::dropIfExists('mensualidades');         
+        Schema::dropIfExists('pagos');                 
+        Schema::dropIfExists('clientes');              
+        Schema::dropIfExists('permiso_rol');           
+        Schema::dropIfExists('permisos');              
+        Schema::dropIfExists('menus');  
+        Schema::dropIfExists('refresh_tokens');                       
+        Schema::dropIfExists('usuarios');  
+        Schema::dropIfExists('ligas');           
+        Schema::dropIfExists('roles');  
+        
     }
 };

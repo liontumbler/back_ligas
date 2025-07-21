@@ -37,7 +37,10 @@ class LicenciaService
     public function eliminarLicencia($id)
     {
         $objetoLicencia = Licencias::find($id);
-        $objetoLicencia->delete();
+        if ($objetoLicencia) {
+            $objetoLicencia->delete();
+        }
+        
         return $objetoLicencia;
     }
 

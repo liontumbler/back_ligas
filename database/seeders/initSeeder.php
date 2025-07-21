@@ -21,11 +21,59 @@ class initSeeder extends Seeder
             'estado' => 'activa',
         ]);
 
+        DB::table('roles')->insert([
+            ['nombre' => 'Admin'],
+            ['nombre' => 'Usuario'],
+            ['nombre' => 'Cliente'],
+        ]);
+
+        DB::table('menus')->insert([
+            ['id' => 1, 'nombre' => 'Usuarios', 'parent_id' => null],
+            ['id' => 2, 'nombre' => 'Configuración', 'parent_id' => null],
+            ['id' => 3, 'nombre' => 'Crear Usuario', 'parent_id' => 1],
+            ['id' => 4, 'nombre' => 'Editar Usuario', 'parent_id' => 1],
+            ['id' => 5, 'nombre' => 'Leer Usuario', 'parent_id' => 1],
+            ['id' => 6, 'nombre' => 'Editar Usuario', 'parent_id' => 1],
+        ]);
+
         DB::table('usuarios')->insert([
-            'nombres' => 'super',
-            'apellidos' => 'Admin',
-            'correo' => "admin@superadmin.com",
-            'password' => Hash::make('Admin1234$'),
+            [
+                'nombres' => 'super',
+                'apellidos' => 'Admin',
+                'correo' => "admin@superadmin.com",
+                'password' => Hash::make('Admin1234$'),
+                'rol_id' => 1
+            ],
+            [
+                'nombre' => 'Edwin',
+                'apellidos' => 'Velasquez',
+                'email' => 'edwin@mail.com',
+                'password' => Hash::make('123456'),
+                'rol_id' => 2
+            ],
+            [
+                'nombre' => 'Luis',
+                'apellidos' => 'manga',
+                'email' => 'luis@mail.com',
+                'password' => Hash::make('123456'),
+                'rol_id' => 3
+            ]
+        ]);
+
+        DB::table('permisos')->insert([
+            ['id' => 1, 'menu_id' => 1, 'action' => 'view'],     // Usuarios
+            ['id' => 2, 'menu_id' => 3, 'action' => 'create'],   // Crear Usuario
+            ['id' => 3, 'menu_id' => 4, 'action' => 'update'],   // Editar Usuario
+            ['id' => 4, 'menu_id' => 2, 'action' => 'view'],     // Configuración
+        ]);
+
+        DB::table('permiso_rol')->insert([
+            ['rol_id' => 1, 'permiso_id' => 1],
+            ['rol_id' => 1, 'permiso_id' => 2],
+            ['rol_id' => 1, 'permiso_id' => 3],
+            ['rol_id' => 1, 'permiso_id' => 4],
+            ['rol_id' => 2, 'permiso_id' => 1],
+            ['rol_id' => 2, 'permiso_id' => 3],
         ]);
     }
 }

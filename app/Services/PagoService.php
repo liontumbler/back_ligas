@@ -35,7 +35,10 @@ class PagoService
     public function eliminarPago($id)
     {
         $objetoPago = Pagos::find($id);
-        $objetoPago->delete();
+        if ($objetoPago) {
+            $objetoPago->delete();
+        }
+
         return $objetoPago;
     }
 

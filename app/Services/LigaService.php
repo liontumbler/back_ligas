@@ -33,7 +33,10 @@ class LigaService
     public function eliminarLiga($id)
     {
         $objetoLiga = Ligas::find($id);
-        $objetoLiga->delete();
+        if ($objetoLiga) {
+            $objetoLiga->delete();
+        }
+
         return $objetoLiga;
     }
 

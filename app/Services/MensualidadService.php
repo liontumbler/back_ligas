@@ -37,7 +37,10 @@ class MensualidadService
     public function eliminarMensualidade($id)
     {
         $objetoMensualidade = Mensualidades::find($id);
-        $objetoMensualidade->delete();
+        if ($objetoMensualidade) {
+            $objetoMensualidade->delete();
+        }
+
         return $objetoMensualidade;
     }
 
