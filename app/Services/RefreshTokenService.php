@@ -75,5 +75,8 @@ class RefreshTokenService
         return RefreshTokens::where('refresh_token', $refreshToken)->first();
     }
 
-    
+    public function revocarTodosLosRefreshTokens($id)
+    {
+        return RefreshTokens::where('usuario_id', $id)->where('revoked', false)->update(['revoked' => true]);
+    }
 }

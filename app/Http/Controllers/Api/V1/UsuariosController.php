@@ -136,19 +136,22 @@ class UsuariosController extends Controller
             $datos = $this->usuarioService->obtenerXcorreo($data['correo']);
             if ($datos !== null) {
                 if (Hash::check($data['password'], $datos['password'])) {
-                    $token = $this->jwt->generateToken($datos);
-                    $tokenRefresh = [
-                        'usuario_id' => $datos->id,
-                        'refresh_token' => $token['refresh_token'],
-                        'ip_address' => $request->getClientIp(),//$request->ip(),
-                        'usuario_agent' => $request->header('User-Agent'),
-                    ];
-                    $resToken = $this->refreshTokenService->crearRefreshToken($tokenRefresh);
-                    if ($resToken) {
-                        $this->arregloRetorno = ManejoData::armarDevolucion(200, true, "Login ok", $token);
-                    } else {
-                        $this->arregloRetorno = ManejoData::armarDevolucion(400, false, "error insercion token", null, 'token refresh');
-                    }
+
+                $this->arregloRetorno = $this->createTokenRefresh('Login ok', $datos, $request->getClientIp(), $request->header('User-Agent'));
+                    // $token = $this->jwt->generateToken($datos);
+                    // $tokenRefresh = [
+                    //     'usuario_id' => $datos->id,
+                    //     'refresh_token' => $token['refresh_token'],
+                    //     'ip_address' => , //$request->ip(),
+                    //     'usuario_agent' => ,
+                    // ];
+                    // $this->refreshTokenService->revocarTodosLosRefreshTokens();
+                    // $resToken = $this->refreshTokenService->crearRefreshToken($tokenRefresh);
+                    // if ($resToken) {
+                    //     $this->arregloRetorno = ManejoData::armarDevolucion(200, true, "Login ok", $token);
+                    // } else {
+                    //     $this->arregloRetorno = ManejoData::armarDevolucion(400, false, "error insercion token", null, 'token refresh');
+                    // }
                 } else {
                     $this->arregloRetorno = ManejoData::armarDevolucion(400, true, "datos incorrectos", null, 'datos incorrectos');
                 }
@@ -167,13 +170,13 @@ class UsuariosController extends Controller
         try {
             $authorization = $request->header('Authorization');
             $refreshToken = '';
-            
+
             if ($authorization && str_starts_with($authorization, 'Bearer ')) {
                 $refreshToken = substr($authorization, 7);
-            } 
+            }
 
             $token = $this->refreshTokenService->obtenerXRefreshToken($refreshToken);
-            
+
             if (!$refreshToken) {
                 $this->arregloRetorno = ManejoData::armarDevolucion(400, false, "Refresh token requerido", null, 'refresh_token');
             } elseif (!$token) {
@@ -187,6 +190,51 @@ class UsuariosController extends Controller
             $this->arregloRetorno = ManejoData::armarDevolucion(500, false, "Error inesperado", null,  ManejoData::verificarExcepciones($e));
         } finally {
             return response()->json($this->arregloRetorno, $this->arregloRetorno['code']);
+        }
+    }
+
+    public function refresToken(Request $request)
+    {
+        try {
+            $authorization = $request->header('Authorization');
+            $refreshToken = '';
+
+            if ($authorization && str_starts_with($authorization, 'Bearer ')) {
+                $refreshToken = substr($authorization, 7);
+            }
+
+            $token = $this->refreshTokenService->obtenerXRefreshToken($refreshToken);
+
+            if (!$refreshToken) {
+                $this->arregloRetorno = ManejoData::armarDevolucion(400, false, "Refresh token requerido", null, 'refresh_token');
+            } elseif (!$token) {
+                $this->arregloRetorno = ManejoData::armarDevolucion(404, false, "Token no encontrado", null, 'refresh_token');
+            } else {
+                $datos = $this->usuarioService->obtenerXId($request->usuario->id);
+
+                $this->arregloRetorno = $this->createTokenRefresh('refresh ok', $datos, $request->getClientIp(), $request->header('User-Agent'));
+            }
+        } catch (Exception $e) {
+            $this->arregloRetorno = ManejoData::armarDevolucion(500, false, "Error inesperado", null,  ManejoData::verificarExcepciones($e));
+        } finally {
+            return response()->json($this->arregloRetorno, $this->arregloRetorno['code']);
+        }
+    }
+
+    private function createTokenRefresh($msg, $datos, $ip, $userAgent) {
+        $token = $this->jwt->generateToken($datos);
+        $tokenRefresh = [
+            'usuario_id' => $datos->id,
+            'refresh_token' => $token['refresh_token'],
+            'ip_address' => $ip, //$request->ip(),
+            'usuario_agent' => $userAgent,
+        ];
+        $this->refreshTokenService->revocarTodosLosRefreshTokens($datos->id);
+        $resToken = $this->refreshTokenService->crearRefreshToken($tokenRefresh);
+        if ($resToken) {
+            return ManejoData::armarDevolucion(200, true, $msg, $token);
+        } else {
+            return ManejoData::armarDevolucion(400, false, "error insercion token", null, 'token refresh');
         }
     }
 }
