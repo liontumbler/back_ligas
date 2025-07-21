@@ -140,15 +140,15 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ligas');
-        Schema::dropIfExists('usuarios');
-        Schema::dropIfExists('clientes');
-        Schema::dropIfExists('pagos');
-        Schema::dropIfExists('mensualidades');
         Schema::dropIfExists('entrenos');
+        Schema::dropIfExists('mensualidades');
         Schema::dropIfExists('licencias');
+        Schema::dropIfExists('permiso_rol');
         Schema::dropIfExists('roles');
         Schema::dropIfExists('permisos');
-        Schema::dropIfExists('permiso_rol');
+        Schema::dropIfExists('pagos');
+        Schema::dropIfExists('clientes');
+        Schema::dropIfExists('usuarios');
+        Schema::dropIfExists('ligas');
     }
 };

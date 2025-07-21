@@ -130,9 +130,15 @@ class UsuariosController extends Controller
             ]);
             
             $datos = $this->usuarioService->obtenerXcorreo($data['correo']);
-            if (Hash::check($data['password'], $datos['password'])) {
-                $token = $this->jwt->generateToken($datos);
-                $this->arregloRetorno = ManejoData::armarDevolucion(200, true, "Login ok", $token);
+            if ($datos !== null) {
+                if (Hash::check($data['password'], $datos['password'])) {
+                    $token = $this->jwt->generateToken($datos);
+                    $this->arregloRetorno = ManejoData::armarDevolucion(200, true, "Login ok", $token);
+                } else {
+                    $this->arregloRetorno = ManejoData::armarDevolucion(400, true, "datos incorrectos", [], 'datos incorrectos');
+                }
+            } else {
+                $this->arregloRetorno = ManejoData::armarDevolucion(400, true, "datos incorrectos", [], 'datos incorrectos');
             }
         } catch (Exception $e) {
             $this->arregloRetorno = ManejoData::armarDevolucion(500, false, "Error inesperado", null,  ManejoData::verificarExcepciones($e));

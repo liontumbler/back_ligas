@@ -24,7 +24,7 @@ class initSeeder extends Seeder
         DB::table('usuarios')->insert([
             'nombres' => 'super',
             'apellidos' => 'Admin',
-            'correo' => "2025-07-01 00:00:00",
+            'correo' => "admin@superadmin.com",
             'password' => Hash::make('Admin1234$'),
         ]);
     }
