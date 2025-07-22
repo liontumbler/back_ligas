@@ -7,28 +7,33 @@ use Illuminate\Http\Request;
 use Exception;
 use App\Utils\ManejoData;
 
-use App\Services\LigaService;
+use App\Services\ClienteService;
 
-class LigasController extends Controller
+class ClientesController extends Controller
 {
-    protected $ligaService;
+    protected $clienteService;
     protected $arregloRetorno = [];
 
     protected $reglaCrear = [
-        'nombre' => 'required|string|max:100',
-        'direccion' => 'nullable|string|max:100',
-        'telefono' => 'nullable|string|max:20'
+        'nombres' => 'required|string|max:100',
+        'apellidos' => 'required|string|max:100',
+        'correo' => 'required|string|max:20',
+        'telefono' => 'nullable|string|max:20',
+        'liga_id' => 'required|string'
+        
     ];
 
     protected $reglaActualizar = [
-        'nombre'    => 'sometimes|required|string|max:100',
-        'direccion' => 'sometimes|nullable|string|max:100',
-        'telefono'  => 'sometimes|nullable|string|max:20'
+        'nombres' => 'sometimes|required|string|max:100',
+        'apellidos' => 'sometimes|required|string|max:100',
+        'correo' => 'sometimes|required|string|max:20',
+        'telefono' => 'sometimes|nullable|string|max:20',
+        'liga_id' => 'sometimes|nullable|string'
     ];
 
     public function __construct()
     {
-        $this->ligaService = new LigaService();
+        $this->clienteService = new ClienteService();
     }
 
     public function index(Request $request)
@@ -37,8 +42,8 @@ class LigasController extends Controller
             $size = $request->input('size', '0');
             $sort = $request->input('sort', 'id:asc');
             $filter = $request->input('filter', null);
-            $ligas = $this->ligaService->todo($sort, $size, $filter);
-            $this->arregloRetorno = ManejoData::armarDevolucion(200, true, "Se muestra con exito", $ligas);
+            $clientes = $this->clienteService->todo($sort, $size, $filter);
+            $this->arregloRetorno = ManejoData::armarDevolucion(200, true, "Se muestra con exito", $clientes);
         } catch (Exception $e) {
             $this->arregloRetorno = ManejoData::armarDevolucion(500, false, "Error inesperado", null, ManejoData::verificarExcepciones($e));
         } finally {
@@ -50,9 +55,9 @@ class LigasController extends Controller
     {
         try {
             $data = $request->validate($this->reglaCrear);
-            $liga = $this->ligaService->crearLiga($data, $request->usuario);
+            $cliente = $this->clienteService->crearcliente($data, $request->usuario);
 
-            $this->arregloRetorno = ManejoData::armarDevolucion(201, true, "Se creo exitosamente", $liga);
+            $this->arregloRetorno = ManejoData::armarDevolucion(201, true, "Se creo exitosamente", $cliente);
         } catch (Exception $e) {
             $this->arregloRetorno = ManejoData::armarDevolucion(500, false, "Error inesperado", null,  ManejoData::verificarExcepciones($e));
         } finally {
@@ -63,11 +68,11 @@ class LigasController extends Controller
     public function show($id)
     {
         try {
-            $liga = $this->ligaService->obtenerXId($id);
-            if (!$liga) {
+            $cliente = $this->clienteService->obtenerXId($id);
+            if (!$cliente) {
                 $this->arregloRetorno = ManejoData::armarDevolucion(404, true, "Valor no encontrado", []);
             } else {
-                $this->arregloRetorno = ManejoData::armarDevolucion(200, true, "Se muestra con exito", $liga);
+                $this->arregloRetorno = ManejoData::armarDevolucion(200, true, "Se muestra con exito", $cliente);
             }
         } catch (Exception $e) {
             $this->arregloRetorno = ManejoData::armarDevolucion(500, false, "Error inesperado", null,  ManejoData::verificarExcepciones($e));
@@ -79,15 +84,15 @@ class LigasController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $liga = $this->ligaService->obtenerXId($id);
-            if (!$liga) {
+            $cliente = $this->clienteService->obtenerXId($id);
+            if (!$cliente) {
                 $this->arregloRetorno = ManejoData::armarDevolucion(404, true, "Valor no encontrado", []);
             } else {
                 $isPut = $request->method() === 'PUT';
 
                 $rules = $isPut ? $this->reglaCrear : $this->reglaActualizar;
                 $data = $request->validate($rules);
-                $datos = $this->ligaService->actualizarLiga($id, $data, $request->usuario);
+                $datos = $this->clienteService->actualizarcliente($id, $data, $request->usuario);
 
                 $this->arregloRetorno = ManejoData::armarDevolucion(200, true, "Se actualiza con exito", $datos);
             }
@@ -101,11 +106,11 @@ class LigasController extends Controller
     public function destroy($id)
     {
         try {
-            $liga = $this->ligaService->obtenerXId($id);
-            if (!$liga) {
+            $cliente = $this->clienteService->obtenerXId($id);
+            if (!$cliente) {
                 $this->arregloRetorno = ManejoData::armarDevolucion(404, true, "Valor no encontrado", []);
             } else {
-                $datos = $this->ligaService->eliminarLiga($id);
+                $datos = $this->clienteService->eliminarcliente($id);
                 $this->arregloRetorno = ManejoData::armarDevolucion(200, true, "Se elimina con exito", $datos);
             }
         } catch (Exception $e) {

@@ -19,7 +19,7 @@ class Clientes extends Model
     public $incrementing    =   true;
     public $timestamps      =   true;
 
-    protected $fillable = ['nombre', 'email', 'telefono'];
+    protected $fillable = ['nombres', 'apellidos', 'correo', 'telefono', 'liga_id'];
 
     public function pagos()
     {
