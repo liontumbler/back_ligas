@@ -149,8 +149,10 @@ return new class extends Migration
         Schema::create('refresh_tokens', function (Blueprint $table) {
             $table->id();
             $table->string('refresh_token');
-            $table->string('ip_address')->nullable();
-            $table->string('usuario_agent')->nullable();
+            $table->string('ip_address', 45);
+            $table->string('usuario_agent');
+            $table->decimal('latitud', 10, 7);
+            $table->decimal('longitud', 10, 7);        
             $table->boolean('revoked')->default(false);
             $table->timestamp('fecha_creacion')->nullable();
             $table->timestamp('fecha_modificacion')->nullable();
