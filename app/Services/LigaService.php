@@ -12,7 +12,6 @@ class LigaService
         isset($array['nombre']) ? $objetoLiga->nombre = $array['nombre'] : null;
         isset($array['direccion']) ? $objetoLiga->direccion = $array['direccion'] : null;
         isset($array['telefono']) ? $objetoLiga->telefono = $array['telefono'] : null;
-        isset($usuario) ? $objetoLiga->usuario_creacion = $usuario->id : null;
         $objetoLiga->save();
 
         return $objetoLiga;
@@ -24,7 +23,6 @@ class LigaService
         isset($array['nombre']) ? $objetoLiga->nombre = $array['nombre'] : null;
         isset($array['direccion']) ? $objetoLiga->direccion = $array['direccion'] : null;
         isset($array['telefono']) ? $objetoLiga->telefono = $array['telefono'] : null;
-        isset($usuario) ? $objetoLiga->usuario_modificacion = $usuario->id : null;
         $objetoLiga->save();
 
         return $objetoLiga;
