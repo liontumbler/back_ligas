@@ -89,6 +89,12 @@
             zoomControl: false,
             layers: [map1],
             //zoomSnap: 0.25
+            dragging: false,          // 🚫 Desactiva mover el mapa
+            scrollWheelZoom: false,   // 🚫 Desactiva zoom con rueda
+            doubleClickZoom: false,   // 🚫 Desactiva zoom con doble clic
+            boxZoom: false,           // 🚫 Desactiva zoom con caja
+            keyboard: false,          // 🚫 Desactiva atajos con teclado
+            zoomControl: false  
         });
 
         let zoom = L.control.zoom({
