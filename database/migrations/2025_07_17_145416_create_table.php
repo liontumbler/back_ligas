@@ -151,6 +151,9 @@ return new class extends Migration
             $table->string('refresh_token');
             $table->string('ip_address', 45);
             $table->string('usuario_agent');
+            $table->string('pais', 100)->nullable();
+            $table->string('region', 100)->nullable();
+            $table->string('ciudad', 100)->nullable();
             $table->decimal('latitud', 10, 7);
             $table->decimal('longitud', 10, 7);        
             $table->boolean('revoked')->default(false);
