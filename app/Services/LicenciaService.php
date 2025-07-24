@@ -40,13 +40,17 @@ class LicenciaService
         if ($objetoLicencia) {
             $objetoLicencia->delete();
         }
-        
+
         return $objetoLicencia;
     }
 
-    public function todo($ordenar, $tamaño = 0, $buscar = null)
+    public function todo($usuario, $ordenar, $tamaño = 0, $buscar = null)
     {
-        $Licencias = Licencias::query();
+        $Licencias = Licencias::where(function ($query) use ($usuario) {
+            $query->where('usuario_creacion', $usuario->id)
+                ->orWhere('usuario_modificacion', $usuario->id);
+        });
+
         $allowedColumns = ['codigo', 'valor', 'fecha_inicio', 'fecha_fin', 'estado'];
 
         if (!empty($buscar)) {
@@ -65,7 +69,11 @@ class LicenciaService
             }
         }
 
-        return $Licencias->paginate($tamaño);
+        return $tamaño > 0
+            ? $Licencias->paginate($tamaño)
+            : $Licencias->get();
+
+        //return $Licencias->paginate($tamaño);
         //return Licencias::all();
     }
 

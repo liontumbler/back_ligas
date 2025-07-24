@@ -24,12 +24,13 @@ class Jwt
         $payload = json_decode($this->base64url_decode($payloadB64), true);
         $signature = hash_hmac('sha256', "$headerB64.$payloadB64", $secret, true);
         $signatureCheckB64 = $this->base64url_encode($signature);
-
         if (!$authorization || !str_starts_with($authorization, 'Bearer ')) {
             $devolucion = ManejoData::armarDevolucion(401, false, 'Token no proporcionado Bearer', null, 'token autenticacion');
         } elseif (count($parts) !== 3) {
             $devolucion = ManejoData::armarDevolucion(401, false, 'Token inválido', null, 'token autenticacion');
-        } elseif (!hash_equals($signatureCheckB64, $signatureB64)) {
+        } 
+        //validar que en la db exista por que no existe en la db y lo pasa
+        elseif (!hash_equals($signatureCheckB64, $signatureB64)) {
             $devolucion = ManejoData::armarDevolucion(401, false, 'Firma inválida', null, 'token autenticacion');
         } elseif (!$payload || $payload['exp'] < time()) {
             $devolucion = ManejoData::armarDevolucion(401, false, 'Token expirado', null, 'token autenticacion');

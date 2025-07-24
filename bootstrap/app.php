@@ -6,6 +6,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 
 use App\Http\Middleware\JwtMiddleware;
 use App\Http\Middleware\VerificarLicenciaMiddleware;
+use App\Http\Middleware\ContentSecurityPolicy;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -15,11 +16,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->append(ContentSecurityPolicy::class);
+        $middleware->append(VerificarLicenciaMiddleware::class);
         $middleware->alias([
             'JWT' => JwtMiddleware::class,
-            'VerificaLicencia' => VerificarLicenciaMiddleware::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+
     })->create();

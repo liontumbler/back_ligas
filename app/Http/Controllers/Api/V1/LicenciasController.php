@@ -41,7 +41,7 @@ class LicenciasController extends Controller
             $size = $request->input('size', '0');
             $sort = $request->input('sort', 'id:asc');
             $filter = $request->input('filter', null);
-            $licencias = $this->licenciaService->todo($sort, $size, $filter);
+            $licencias = $this->licenciaService->todo($request->usuario, $sort, $size, $filter);
             $this->arregloRetorno = ManejoData::armarDevolucion(200, true, "Se muestra con exito", $licencias);
         } catch (Exception $e) {
             $this->arregloRetorno = ManejoData::armarDevolucion(500, false, "Error inesperado", null, ManejoData::verificarExcepciones($e));

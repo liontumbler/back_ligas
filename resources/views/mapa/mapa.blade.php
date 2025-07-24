@@ -962,6 +962,240 @@
 
     </script>
 
+
+📄 Política de Tratamiento de Datos Sensibles
+[Nombre de la empresa o desarrollador], identificado con NIT/Cédula No. [●], domiciliado en [Ciudad, País], en cumplimiento de la Ley 1581 de 2012 y el Decreto 1377 de 2013, informa que los siguientes lineamientos aplican al tratamiento de datos personales sensibles que sean recolectados, almacenados, usados o tratados a través de nuestras plataformas, aplicaciones, formularios, servicios web o cualquier otro medio.
+
+1. ¿Qué son datos sensibles?
+Se consideran datos sensibles aquellos que afectan la intimidad del titular o cuyo uso indebido puede generar discriminación. Ejemplos de datos sensibles incluyen, pero no se limitan a:
+
+Información sobre salud.
+
+Huellas dactilares, reconocimiento facial, biometría.
+
+Geolocalización en tiempo real.
+
+Orientación sexual, religiosa o política.
+
+Información sobre menores de edad.
+
+2. Finalidad del tratamiento
+Los datos sensibles serán tratados únicamente con autorización expresa del titular, y con las siguientes finalidades:
+
+Mejorar la experiencia del usuario mediante personalización geográfica (solo si el usuario lo autoriza).
+
+Cumplir con obligaciones legales o contractuales.
+
+Monitoreo o seguridad de nuestras plataformas.
+
+Realizar análisis internos, siempre garantizando la anonimización cuando sea posible.
+
+3. Requisitos para el tratamiento de datos sensibles
+De acuerdo con la ley, el tratamiento de datos sensibles está prohibido, salvo que:
+
+El titular otorgue su consentimiento expreso, libre, previo e informado.
+
+Sea necesario para proteger intereses vitales del titular.
+
+Sea requerido por autoridad competente.
+
+Tenga fines de salud autorizados por ley.
+
+4. Derecho del titular
+El titular tiene derecho a:
+
+Conocer, actualizar, rectificar o suprimir sus datos.
+
+Revocar la autorización en cualquier momento.
+
+Ser informado sobre el uso dado a sus datos.
+
+Presentar quejas ante la Superintendencia de Industria y Comercio.
+
+5. Forma de obtener el consentimiento
+El consentimiento para el tratamiento de datos sensibles será recolectado mediante mecanismos de confirmación explícita (opt-in), como formularios electrónicos, casillas de verificación o aceptación de términos, en los que se informe:
+
+Qué datos se recolectan.
+
+Para qué se usarán.
+
+Si serán compartidos con terceros.
+
+Cómo puede ejercer sus derechos.
+
+6. Seguridad
+Nos comprometemos a aplicar medidas de seguridad administrativas, técnicas y físicas para garantizar la protección de los datos sensibles, evitando su acceso no autorizado o fraudulento.
+
+7. Responsable del tratamiento
+Nombre del Responsable: [Nombre del responsable legal o entidad]
+Correo electrónico: [●]
+Teléfono de contacto: [●]
+Dirección: [●]
+
+Fecha de entrada en vigencia: [●]
+    <script>
+        archivoInput.addEventListener('change', () => {
+            precargaImg(archivoInput.files)
+        });
+
+        function precargaImg(files) {
+            let col = 0
+            if (files.length > 4) {
+                col = 3
+            } else {
+                col = 12 / files.length
+            }
+
+            files.foreach((file, key) => {
+                if (!file) {
+                    previewImg.style.display = 'none';
+                    previewImg.src = '';
+                    return;
+                }
+
+                const maxSize = 2 * 1024 * 1024;
+
+                if (file.size > maxSize) {
+                    console.error('El archivo supera el tamaño máximo de 2MB.');
+                    archivoInput.value = '';
+                    previewImg.style.display = 'none';
+                    previewImg.src = '';
+                    return;
+                }
+
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        previewImg.src = e.target.result;
+                        previewImg.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    previewImg.style.display = 'none';
+                    previewImg.src = '';
+                }
+            })
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////
+        let geolocation = null;
+        function llenarGeoReferencia(ip, ciudad, continente, pais, latitud, longitud) {
+            return {
+                ip: ip,
+                continente: ciudad,
+                pais: continente,
+                ciudad: pais,
+                latitud: latitud,
+                longitud: longitud
+            }
+        }
+
+        async function obtenerIp(latitud = null, longitud = null) {
+            try {
+                await serviceApiBigdatacloudNet(latitud, longitud)
+            } catch (error1) {
+                try {
+                    await serviceIpapiCo(latitud, longitud)
+                } catch (error2) {
+                    try {
+                        await serviceApiMyIpIo(latitud, longitud)
+                    } catch (error3) {
+                        try {
+                            await serviceIpinfoIo(latitud, longitud)
+                        } catch (error4) {
+                            console.error('captura de ip', error4)
+                        }
+                    }
+                }
+            }
+        }
+
+        async function serviceExterna(url, method) {
+            const requestOptions = {
+                method: method,
+                redirect: "follow"
+            }
+
+            return await fetch(url, requestOptions)
+                .then((response) => response.json())
+                .catch((error) => console.error(error))
+        }
+
+        async function serviceApiBigdatacloudNet(latitud = null, longitud = null) {
+            let response = await serviceExterna('https://api.bigdatacloud.net/data/reverse-geocode-client', 'GET')
+            const responseIp = await serviceExterna('https://api.bigdatacloud.net/data/client-ip', 'GET')
+            //console.log('api.bigdatacloud')
+
+            latitud ? response.latitude = latitud : null
+            longitud ? response.longitude = longitud : null
+
+            geolocation = llenarGeoReferencia(responseIp.ipString, response.city, response.continent, response.countryName, response.latitude, response.longitude)
+        }
+
+        async function serviceIpapiCo(latitud = null, longitud = null) {
+            let response = await serviceExterna('https://ipapi.co/json', 'GET')
+            const [continente, ciudad] = response.timezone.split("/")
+            //console.log('ipapi')
+
+            latitud ? response.latitude = latitud : null
+            longitud ? response.longitude = longitud : null
+
+            geolocation = llenarGeoReferencia(response.ip, response.city, continente, response.country_name, response.latitude, response.longitude)
+        }
+
+        async function serviceApiMyIpIo(latitud = null, longitud = null) {
+            let response = await serviceExterna('https://api.my-ip.io/v2/ip.json', 'GET')
+            const [continente, ciudad] = response.timezone.split("/")
+            //console.log('api.my-ip')
+
+            latitud ? response.lat = latitud : null
+            longitud ? response.lon = longitud : null
+
+            geolocation = llenarGeoReferencia(response.ip, response.city, continente, response.country.name, response.location.lat, response.location.lon)
+        }
+
+        async function serviceIpinfoIo(latitud = null, longitud = null) {
+            let response = await serviceExterna('https://ipinfo.io/json', 'GET')
+            let [latitude, longitude] = response.loc.split(",")
+            const [organizacion, pais] = response.loc.split(" - ")
+            const [continente, ciudad] = response.timezone.split("/")
+            //console.log('ipinfo')
+
+            latitud ? latitude = latitud : null
+            longitud ? longitude = longitud : null
+
+            geolocation = llenarGeoReferencia(response.ip, response.city, continente, pais, latitude, longitude)
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            async (posicion) => {
+                const { latitude, longitude } = posicion.coords
+                await obtenerIp(latitude, longitude)
+            },
+            async (error) => {
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        console.error("Permiso denegado por el usuario.")
+                        break
+                    case error.POSITION_UNAVAILABLE:
+                        console.error("La información de ubicación no está disponible.")
+                        break
+                    case error.TIMEOUT:
+                        console.error("La solicitud de ubicación expiró.")
+                        break
+                    default:
+                        console.error("Error desconocido:", error.message)
+                        break
+                }
+                await obtenerIp()
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        )
+    </script>
 </body>
 
 </html>

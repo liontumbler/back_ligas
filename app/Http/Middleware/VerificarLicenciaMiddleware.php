@@ -17,7 +17,7 @@ class VerificarLicenciaMiddleware
         $codigoLicencia = $request->header('License');
 
         if (!$codigoLicencia) {
-            $devolucion = ManejoData::armarDevolucion(400, false, 'Licencia no proporcionada en los headers', null, 'Licencia');
+            $devolucion = ManejoData::armarDevolucion(400, false, 'Licencia no proporcionada', null, 'Licencia');
             return response()->json($devolucion, $devolucion['code']);
         }
 

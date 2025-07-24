@@ -14,13 +14,6 @@ class initSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('licencias')->insert([
-            'codigo' => 'superAdminLicense',
-            'valor' => 0,
-            'fecha_inicio' => "2025-07-01 00:00:00",
-            'estado' => 'activa',
-        ]);
-
         DB::table('roles')->insert([
             ['nombre' => 'Admin'],
             ['nombre' => 'Usuario'],
@@ -58,6 +51,15 @@ class initSeeder extends Seeder
                 'password' => Hash::make('123456'),
                 'rol_id' => 3
             ]
+        ]);
+
+        DB::table('licencias')->insert([
+            'codigo' => 'superAdminLicense',
+            'valor' => 0,
+            'fecha_inicio' => "2025-07-01 00:00:00",
+            'estado' => 'activa',
+            'usuario_creacion' => 1, 
+            'usuario_modificacion' => 1,
         ]);
 
         DB::table('permisos')->insert([

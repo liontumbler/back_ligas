@@ -7,14 +7,14 @@ use App\Http\Controllers\Api\V1\UsuariosController;
 use App\Http\Controllers\Api\V1\LicenciasController;
 use App\Http\Controllers\Api\V1\ClientesController;
 
-Route::middleware(['VerificaLicencia', 'JWT'])->group(function () {
+Route::middleware(['JWT'])->group(function () {
     Route::apiResource('licencias', LicenciasController::class);
     Route::apiResource('ligas', LigasController::class);
     Route::apiResource('usuarios', UsuariosController::class);
     Route::apiResource('clientes', ClientesController::class);
 });
 
-Route::post('login', [UsuariosController::class, 'login'])->middleware('VerificaLicencia');
+Route::post('login', [UsuariosController::class, 'login']);
 
 // apiResource
 // Route::get('ligas', [LigasController::class, 'index']);       // Obtener todos los recursos
