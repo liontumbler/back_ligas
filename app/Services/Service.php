@@ -6,17 +6,17 @@ class Service
 {
     protected $allowedColumns;
     protected $model;
-    public function __construct($modeloClase, $allowedColumns) {
+    protected function __construct($modeloClase, $allowedColumns) {
         $this->model = app($modeloClase);
         $this->allowedColumns = $allowedColumns;
     }
 
-    public function obtenerXId($id)
+    protected function obtenerXId($id)
     {
         return $this->model::find($id);
     }
 
-    public function eliminar($id)
+    protected function eliminar($id)
     {
         $objetoLicencia = $this->model::find($id);
         if ($objetoLicencia) {
@@ -26,7 +26,7 @@ class Service
         return $objetoLicencia;
     }
 
-    public function todo($usuario, $ordenar, $tamaño = 0, $buscar = null)
+    protected function todo($usuario, $ordenar, $tamaño = 0, $buscar = null)
     {
         $Licencias = $this->model::where(function ($query) use ($usuario) {
             $query->where('usuario_creacion', $usuario->id)

@@ -3,13 +3,11 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-//use App\Models\Tablas\RefreshTokens;
 use Illuminate\Http\Request;
 use Exception;
 use App\Utils\ManejoData;
 use App\Utils\Jwt;
 use Illuminate\Support\Facades\Hash;
-//use Illuminate\Support\Facades\Crypt;
 
 use App\Services\UsuarioService;
 use App\Services\RefreshTokenService;
@@ -42,6 +40,7 @@ class UsuariosController extends Controller
 
     public function login(Request $request)
     {
+        
         try {
             $data = $request->validate([
                 'correo' => 'required|string|email|max:20',
@@ -53,17 +52,17 @@ class UsuariosController extends Controller
             if (!$encrypted) {
                 $this->arregloRetorno = ManejoData::armarDevolucion(400, false, "Refresh token encryp", null, 'refresh_token');
             } else {
-                $datos = $this->service->obtenerXcorreo($data['correo']);
-                if ($datos !== null) {
-                    if (Hash::check($data['password'], $datos['password'])) {
+                $usuario = $this->service->obtenerXcorreo($data['correo']);
+                if ($usuario !== null) {
+                    if (Hash::check($data['password'], $usuario['password'])) {
+                        $this->mail($usuario);
 
                         $desencryptado = $this->desencriptado($encrypted);
                         $desencriptado = json_decode($desencryptado->original['desencriptado']);
 
-                        $this->arregloRetorno = $this->createTokenRefresh('Login ok', $datos, $request->getClientIp(), $request->header('User-Agent'), $desencriptado->continente, $desencriptado->pais, $desencriptado->ciudad, $desencriptado->latitud, $desencriptado->longitud);
-
+                        $this->arregloRetorno = $this->createTokenRefresh('Login ok', $usuario, $request->getClientIp(), $request->header('User-Agent'), $desencriptado->continente, $desencriptado->pais, $desencriptado->ciudad, $desencriptado->latitud, $desencriptado->longitud);
                     } else {
-                        $this->arregloRetorno = ManejoData::armarDevolucion(400, true, "datos incorrectos", $datos, 'datos incorrectos');
+                        $this->arregloRetorno = ManejoData::armarDevolucion(400, true, "datos incorrectos", $usuario, 'datos incorrectos');
                     }
                 } else {
                     $this->arregloRetorno = ManejoData::armarDevolucion(400, true, "datos incorrectos", null, 'datos incorrectos');

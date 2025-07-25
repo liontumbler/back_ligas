@@ -10,6 +10,7 @@ class ContentSecurityPolicy
     public function handle(Request $request, Closure $next)
     {
         $rules = "default-src 'none'; script-src 'none'; style-src 'none'; img-src 'none'; connect-src 'self'; frame-ancestors 'none';";
+        //$rules = "style-src 'self' 'unsafe-inline'; img-src 'self' https://assets.mailtrap.io data:;";
 
         $response = $next($request);
 

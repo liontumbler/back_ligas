@@ -6,6 +6,10 @@ use Illuminate\Http\Request;
 use Exception;
 use App\Utils\ManejoData;
 
+use App\Mail\ClaveCajaMail;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+
 abstract class Controller
 {
     protected $arregloRetorno = [];
@@ -13,14 +17,14 @@ abstract class Controller
     protected $reglaCrear;
     protected $reglaActualizar;
 
-    public function __construct($service, $reglaCrear, $reglaActualizar)
+    protected function __construct($service, $reglaCrear, $reglaActualizar)
     {
         $this->service = $service;
         $this->reglaCrear = $reglaCrear;
         $this->reglaActualizar = $reglaActualizar;
     }
 
-    public function index(Request $request)
+    protected function index(Request $request)
     {
         try {
             $size = $request->input('size', '0');
@@ -35,7 +39,7 @@ abstract class Controller
         }
     }
 
-    public function store(Request $request)
+    protected function store(Request $request)
     {
         try {
             $data = $request->validate($this->reglaCrear);
@@ -49,7 +53,7 @@ abstract class Controller
         }
     }
 
-    public function show($id)
+    protected function show($id)
     {
         try {
             $licencia = $this->service->obtenerXId($id);
@@ -65,7 +69,7 @@ abstract class Controller
         }
     }
 
-    public function update(Request $request, $id)
+    protected function update(Request $request, $id)
     {
         try {
             $licencia = $this->service->obtenerXId($id);
@@ -87,7 +91,7 @@ abstract class Controller
         }
     }
 
-    public function destroy($id)
+    protected function destroy($id)
     {
         try {
             $licencia = $this->service->obtenerXId($id);
@@ -101,6 +105,17 @@ abstract class Controller
             $this->arregloRetorno = ManejoData::armarDevolucion(500, false, "Error inesperado", null,  ManejoData::verificarExcepciones($e));
         } finally {
             return response()->json($this->arregloRetorno, $this->arregloRetorno['code']);
+        }
+    }
+
+    protected function mail($usuario) {
+        try {
+            Mail::to($usuario->correo)
+            ->send(new ClaveCajaMail('xxxx', $usuario->nombres));
+            return 'bien';
+        } catch (\Exception $e) {
+            Log::error('Error al enviar el correo: ' . $e->getMessage());
+            return 'mal';
         }
     }
 }

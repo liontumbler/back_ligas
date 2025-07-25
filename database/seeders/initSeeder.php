@@ -33,7 +33,7 @@ class initSeeder extends Seeder
             [
                 'nombres' => 'super',
                 'apellidos' => 'Admin',
-                'correo' => "admin@superadmin.com",
+                'correo' => "lion_3214@hotmail.com",
                 'password' => Hash::make('Admin1234$'),
                 'rol_id' => 1
             ],
