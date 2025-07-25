@@ -15,6 +15,8 @@ Route::middleware(['JWT'])->group(function () {
 });
 
 Route::post('login', [UsuariosController::class, 'login']);
+Route::post('refresh-token', [UsuariosController::class, 'refreshToken']);
+
 
 // apiResource
 // Route::get('ligas', [LigasController::class, 'index']);       // Obtener todos los recursos

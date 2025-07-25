@@ -9,6 +9,7 @@ use Exception;
 use App\Utils\ManejoData;
 use App\Utils\Jwt;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Crypt;
 
 use App\Services\UsuarioService;
 use App\Services\RefreshTokenService;
@@ -133,31 +134,30 @@ class UsuariosController extends Controller
                 'password' => 'required|string|max:20'
             ]);
 
-            $datos = $this->usuarioService->obtenerXcorreo($data['correo']);
-            if ($datos !== null) {
-                if (Hash::check($data['password'], $datos['password'])) {
+            $encrypted = $request->header('-----------');
 
-                $this->arregloRetorno = $this->createTokenRefresh('Login ok', $datos, $request->getClientIp(), $request->header('User-Agent'));
-                    // $token = $this->jwt->generateToken($datos);
-                    // $tokenRefresh = [
-                    //     'usuario_id' => $datos->id,
-                    //     'refresh_token' => $token['refresh_token'],
-                    //     'ip_address' => , //$request->ip(),
-                    //     'usuario_agent' => ,
-                    // ];
-                    // $this->refreshTokenService->revocarTodosLosRefreshTokens();
-                    // $resToken = $this->refreshTokenService->crearRefreshToken($tokenRefresh);
-                    // if ($resToken) {
-                    //     $this->arregloRetorno = ManejoData::armarDevolucion(200, true, "Login ok", $token);
-                    // } else {
-                    //     $this->arregloRetorno = ManejoData::armarDevolucion(400, false, "error insercion token", null, 'token refresh');
-                    // }
+            if (!$encrypted) {
+                $this->arregloRetorno = ManejoData::armarDevolucion(400, false, "Refresh token encryp", null, 'refresh_token');
+            } else {
+                $datos = $this->usuarioService->obtenerXcorreo($data['correo']);
+                if ($datos !== null) {
+                    if (Hash::check($data['password'], $datos['password'])) {
+
+                        $desencryptado = $this->desencriptado($encrypted);
+
+                        $desencriptado = json_decode($desencryptado->original['desencriptado']);
+
+                        $this->arregloRetorno = $this->createTokenRefresh('Login ok', $datos, $request->getClientIp(), $request->header('User-Agent'), $desencriptado->continente, $desencriptado->pais, $desencriptado->ciudad, $desencriptado->latitud, $desencriptado->longitud);
+
+                    } else {
+                        $this->arregloRetorno = ManejoData::armarDevolucion(400, true, "datos incorrectos", $datos, 'datos incorrectos');
+                    }
                 } else {
                     $this->arregloRetorno = ManejoData::armarDevolucion(400, true, "datos incorrectos", null, 'datos incorrectos');
                 }
-            } else {
-                $this->arregloRetorno = ManejoData::armarDevolucion(400, true, "datos incorrectos", null, 'datos incorrectos');
             }
+
+            
         } catch (Exception $e) {
             $this->arregloRetorno = ManejoData::armarDevolucion(500, false, "Error inesperado", null,  ManejoData::verificarExcepciones($e));
         } finally {
@@ -193,27 +193,36 @@ class UsuariosController extends Controller
         }
     }
 
-    public function refresToken(Request $request)
+    public function refreshToken(Request $request)
     {
         try {
             $authorization = $request->header('Authorization');
+            $encrypted = $request->header('AffW$·$%·RWrETE%@()/&?=');
+
+            $desencryptado = $this->desencriptado($encrypted);
+
             $refreshToken = '';
 
             if ($authorization && str_starts_with($authorization, 'Bearer ')) {
                 $refreshToken = substr($authorization, 7);
             }
 
-            $token = $this->refreshTokenService->obtenerXRefreshToken($refreshToken);
-
-            if (!$refreshToken) {
+            if (!$encrypted) {
+                $this->arregloRetorno = ManejoData::armarDevolucion(400, false, "Refresh token encryp", null, 'refresh_token');
+            } elseif (!$refreshToken) {
                 $this->arregloRetorno = ManejoData::armarDevolucion(400, false, "Refresh token requerido", null, 'refresh_token');
-            } elseif (!$token) {
-                $this->arregloRetorno = ManejoData::armarDevolucion(404, false, "Token no encontrado", null, 'refresh_token');
             } else {
-                $datos = $this->usuarioService->obtenerXId($request->usuario->id);
+                $token = $this->refreshTokenService->obtenerXRefreshToken($refreshToken);
+                if (!$token) {
+                    $this->arregloRetorno = ManejoData::armarDevolucion(404, false, "Token no encontrado", null, 'refresh_token');
+                } else {
+                    $usuario = $this->usuarioService->obtenerXId($request->usuario->id);
 
-                $this->arregloRetorno = $this->createTokenRefresh('refresh ok', $datos, $request->getClientIp(), $request->header('User-Agent'));
+                    $this->arregloRetorno = $this->createTokenRefresh('refresh ok', $usuario, $request->getClientIp(), $request->header('User-Agent'), $desencryptado->continente, $desencryptado->pais, $desencryptado->ciudad, $desencryptado->latitud, $desencryptado->longitud);
+                }
             }
+            
+            
         } catch (Exception $e) {
             $this->arregloRetorno = ManejoData::armarDevolucion(500, false, "Error inesperado", null,  ManejoData::verificarExcepciones($e));
         } finally {
@@ -221,9 +230,14 @@ class UsuariosController extends Controller
         }
     }
 
-    private function createTokenRefresh($msg, $datos, $ip, $userAgent) {
+    private function createTokenRefresh($msg, $datos, $ip, $userAgent, $continente, $pais, $ciudad, $latitud, $longitud) {
         $token = $this->jwt->generateToken($datos);
         $tokenRefresh = [
+            'continente' => $continente,
+            'pais' => $pais,
+            'ciudad' => $ciudad,
+            'latitud' => $latitud,
+            'longitud' => $longitud,
             'usuario_id' => $datos->id,
             'refresh_token' => $token['refresh_token'],
             'ip_address' => $ip, //$request->ip(),
@@ -237,4 +251,22 @@ class UsuariosController extends Controller
             return ManejoData::armarDevolucion(400, false, "error insercion token", null, 'token refresh');
         }
     }
+
+    private function desencriptado($encrypted)
+    {
+        $key = '12345678901234567890123456789012';
+        $iv = '1234567890123456';
+
+        $cipher = 'AES-256-CBC';
+        $decrypted = openssl_decrypt(
+            base64_decode($encrypted),
+            $cipher,
+            $key,
+            OPENSSL_RAW_DATA,
+            $iv
+        );
+
+        return response()->json(['desencriptado' => $decrypted]);
+    }
+
 }

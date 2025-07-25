@@ -16,6 +16,11 @@ class RefreshTokens extends Model
     public $timestamps      =   true;
 
     protected $fillable = [
+        'continente',
+        'pais',
+        'ciudad',
+        'latitud',
+        'longitud',
         'usuario_id',
         'refresh_token',
         'ip_address',
