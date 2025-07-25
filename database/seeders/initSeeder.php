@@ -40,14 +40,21 @@ class initSeeder extends Seeder
             [
                 'nombre' => 'Edwin',
                 'apellidos' => 'Velasquez',
-                'email' => 'edwin@mail.com',
+                'correo' => 'edwin@mail.com',
                 'password' => Hash::make('123456'),
                 'rol_id' => 2
             ],
             [
                 'nombre' => 'Mauricio',
                 'apellidos' => 'Ocampo',
-                'email' => 'mauricio@mail.com',
+                'correo' => 'ivancho88_8@hotmail.com',
+                'password' => Hash::make('123456'),
+                'rol_id' => 1
+            ],
+            [
+                'nombre' => 'Perez',
+                'apellidos' => 'Ppito',
+                'correo' => 'ppitoape@hotmail.com',
                 'password' => Hash::make('123456'),
                 'rol_id' => 3
             ]
@@ -58,7 +65,7 @@ class initSeeder extends Seeder
             'valor' => 0,
             'fecha_inicio' => "2025-07-01 00:00:00",
             'estado' => 'activa',
-            'usuario_creacion' => 1, 
+            'usuario_creacion' => 1,
             'usuario_modificacion' => 1,
         ]);
 

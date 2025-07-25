@@ -37,7 +37,7 @@ return new class extends Migration
             $table->id();
             $table->string('nombres', 100);
             $table->string('apellidos', 100);
-            $table->string('correo', 20)->unique();
+            $table->string('correo', 100)->unique();
             $table->string('password', 200);
             $table->foreignId('liga_id')->nullable()->constrained('ligas')->onDelete('cascade');
             $table->foreignId('rol_id')->constrained('roles')->onDelete('cascade');
@@ -155,7 +155,7 @@ return new class extends Migration
             $table->string('pais', 100)->nullable();
             $table->string('ciudad', 100)->nullable();
             $table->decimal('latitud', 10, 7);
-            $table->decimal('longitud', 10, 7);        
+            $table->decimal('longitud', 10, 7);
             $table->boolean('revoked')->default(false);
             $table->timestamp('fecha_creacion')->nullable();
             $table->timestamp('fecha_modificacion')->nullable();
@@ -172,17 +172,17 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('licencias');
-        Schema::dropIfExists('entrenos');              
-        Schema::dropIfExists('mensualidades');         
-        Schema::dropIfExists('pagos');                 
-        Schema::dropIfExists('clientes');              
-        Schema::dropIfExists('permiso_rol');           
-        Schema::dropIfExists('permisos');              
-        Schema::dropIfExists('menus');  
-        Schema::dropIfExists('refresh_tokens');                       
-        Schema::dropIfExists('usuarios');  
-        Schema::dropIfExists('ligas');           
-        Schema::dropIfExists('roles');  
-        
+        Schema::dropIfExists('entrenos');
+        Schema::dropIfExists('mensualidades');
+        Schema::dropIfExists('pagos');
+        Schema::dropIfExists('clientes');
+        Schema::dropIfExists('permiso_rol');
+        Schema::dropIfExists('permisos');
+        Schema::dropIfExists('menus');
+        Schema::dropIfExists('refresh_tokens');
+        Schema::dropIfExists('usuarios');
+        Schema::dropIfExists('ligas');
+        Schema::dropIfExists('roles');
+
     }
 };

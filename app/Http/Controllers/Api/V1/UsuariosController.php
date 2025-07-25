@@ -20,7 +20,7 @@ class UsuariosController extends Controller
     protected $reglaCrear = [
         'nombres' => 'required|string|max:100',
         'apellidos' => 'required|string|max:100',
-        'correo' => 'required|string|email|max:20|unique:usuarios,correo',
+        'correo' => 'required|string|email|max:100|unique:usuarios,correo',
         'password' => 'required|string|max:20'
     ];
 
@@ -40,10 +40,10 @@ class UsuariosController extends Controller
 
     public function login(Request $request)
     {
-        
+
         try {
             $data = $request->validate([
-                'correo' => 'required|string|email|max:20',
+                'correo' => 'required|string|email|max:100',
                 'password' => 'required|string|max:20'
             ]);
 
@@ -69,7 +69,7 @@ class UsuariosController extends Controller
                 }
             }
 
-            
+
         } catch (Exception $e) {
             $this->arregloRetorno = ManejoData::armarDevolucion(500, false, "Error inesperado", null,  ManejoData::verificarExcepciones($e));
         } finally {
