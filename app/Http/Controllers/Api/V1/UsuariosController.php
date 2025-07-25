@@ -3,23 +3,21 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Models\Tablas\RefreshTokens;
+//use App\Models\Tablas\RefreshTokens;
 use Illuminate\Http\Request;
 use Exception;
 use App\Utils\ManejoData;
 use App\Utils\Jwt;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Crypt;
+//use Illuminate\Support\Facades\Crypt;
 
 use App\Services\UsuarioService;
 use App\Services\RefreshTokenService;
 
 class UsuariosController extends Controller
 {
-    protected $usuarioService;
     protected $refreshTokenService;
     protected $jwt;
-    protected $arregloRetorno = [];
 
     protected $reglaCrear = [
         'nombres' => 'required|string|max:100',
@@ -37,93 +35,9 @@ class UsuariosController extends Controller
 
     public function __construct()
     {
-        $this->usuarioService = new UsuarioService();
         $this->refreshTokenService = new RefreshTokenService();
         $this->jwt = new Jwt();
-    }
-
-    public function index(Request $request)
-    {
-        try {
-            $size = $request->input('size', '0');
-            $sort = $request->input('sort', 'id:asc');
-            $filter = $request->input('filter', null);
-            $Usuarios = $this->usuarioService->todo($sort, $size, $filter);
-            $this->arregloRetorno = ManejoData::armarDevolucion(200, true, "Se muestra con exito", $Usuarios);
-        } catch (Exception $e) {
-            $this->arregloRetorno = ManejoData::armarDevolucion(500, false, "Error inesperado", null, ManejoData::verificarExcepciones($e));
-        } finally {
-            return response()->json($this->arregloRetorno, $this->arregloRetorno['code']);
-        }
-    }
-
-    public function store(Request $request)
-    {
-        try {
-            $data = $request->validate($this->reglaCrear);
-            $Usuario = $this->usuarioService->crearUsuario($data, $request->usuario);
-
-            $this->arregloRetorno = ManejoData::armarDevolucion(201, true, "Se creo exitosamente", $Usuario);
-        } catch (Exception $e) {
-            $this->arregloRetorno = ManejoData::armarDevolucion(500, false, "Error inesperado", null,  ManejoData::verificarExcepciones($e));
-        } finally {
-            return response()->json($this->arregloRetorno, $this->arregloRetorno['code']);
-        }
-    }
-
-    public function show($id)
-    {
-        try {
-            $Usuario = $this->usuarioService->obtenerXId($id);
-            if (!$Usuario) {
-                $this->arregloRetorno = ManejoData::armarDevolucion(404, true, "Valor no encontrado", []);
-            } else {
-                $this->arregloRetorno = ManejoData::armarDevolucion(200, true, "Se muestra con exito", $Usuario);
-            }
-        } catch (Exception $e) {
-            $this->arregloRetorno = ManejoData::armarDevolucion(500, false, "Error inesperado", null,  ManejoData::verificarExcepciones($e));
-        } finally {
-            return response()->json($this->arregloRetorno, $this->arregloRetorno['code']);
-        }
-    }
-
-    public function update(Request $request, $id)
-    {
-        try {
-            $Usuario = $this->usuarioService->obtenerXId($id);
-            if (!$Usuario) {
-                $this->arregloRetorno = ManejoData::armarDevolucion(404, true, "Valor no encontrado", []);
-            } else {
-                $isPut = $request->method() === 'PUT';
-                $this->reglaActualizar['correo'] = $this->reglaActualizar['correo'] . $request->usuario->id;
-                $rules = $isPut ? $this->reglaCrear : $this->reglaActualizar;
-                $data = $request->validate($rules);
-                $datos = $this->usuarioService->actualizarUsuario($id, $data, $request->usuario);
-
-                $this->arregloRetorno = ManejoData::armarDevolucion(200, true, "Se actualiza con exito", $datos);
-            }
-        } catch (Exception $e) {
-            $this->arregloRetorno = ManejoData::armarDevolucion(500, false, "Error inesperado", null,  ManejoData::verificarExcepciones($e));
-        } finally {
-            return response()->json($this->arregloRetorno, $this->arregloRetorno['code']);
-        }
-    }
-
-    public function destroy($id)
-    {
-        try {
-            $Usuario = $this->usuarioService->obtenerXId($id);
-            if (!$Usuario) {
-                $this->arregloRetorno = ManejoData::armarDevolucion(404, true, "Valor no encontrado", []);
-            } else {
-                $datos = $this->usuarioService->eliminarUsuario($id);
-                $this->arregloRetorno = ManejoData::armarDevolucion(200, true, "Se elimina con exito", $datos);
-            }
-        } catch (Exception $e) {
-            $this->arregloRetorno = ManejoData::armarDevolucion(500, false, "Error inesperado", null,  ManejoData::verificarExcepciones($e));
-        } finally {
-            return response()->json($this->arregloRetorno, $this->arregloRetorno['code']);
-        }
+        parent::__construct(new UsuarioService(), $this->reglaCrear, $this->reglaActualizar);
     }
 
     public function login(Request $request)
@@ -139,12 +53,11 @@ class UsuariosController extends Controller
             if (!$encrypted) {
                 $this->arregloRetorno = ManejoData::armarDevolucion(400, false, "Refresh token encryp", null, 'refresh_token');
             } else {
-                $datos = $this->usuarioService->obtenerXcorreo($data['correo']);
+                $datos = $this->service->obtenerXcorreo($data['correo']);
                 if ($datos !== null) {
                     if (Hash::check($data['password'], $datos['password'])) {
 
                         $desencryptado = $this->desencriptado($encrypted);
-
                         $desencriptado = json_decode($desencryptado->original['desencriptado']);
 
                         $this->arregloRetorno = $this->createTokenRefresh('Login ok', $datos, $request->getClientIp(), $request->header('User-Agent'), $desencriptado->continente, $desencriptado->pais, $desencriptado->ciudad, $desencriptado->latitud, $desencriptado->longitud);
@@ -197,12 +110,9 @@ class UsuariosController extends Controller
     {
         try {
             $authorization = $request->header('Authorization');
-            $encrypted = $request->header('AffW$·$%·RWrETE%@()/&?=');
-
-            $desencryptado = $this->desencriptado($encrypted);
+            $encrypted = $request->header('-----------');
 
             $refreshToken = '';
-
             if ($authorization && str_starts_with($authorization, 'Bearer ')) {
                 $refreshToken = substr($authorization, 7);
             }
@@ -212,17 +122,17 @@ class UsuariosController extends Controller
             } elseif (!$refreshToken) {
                 $this->arregloRetorno = ManejoData::armarDevolucion(400, false, "Refresh token requerido", null, 'refresh_token');
             } else {
+                $desencryptado = $this->desencriptado($encrypted);
+                $desencriptado = json_decode($desencryptado->original['desencriptado']);
                 $token = $this->refreshTokenService->obtenerXRefreshToken($refreshToken);
                 if (!$token) {
                     $this->arregloRetorno = ManejoData::armarDevolucion(404, false, "Token no encontrado", null, 'refresh_token');
                 } else {
-                    $usuario = $this->usuarioService->obtenerXId($request->usuario->id);
+                    $usuario = $this->service->obtenerXId($request->usuario->id);
 
-                    $this->arregloRetorno = $this->createTokenRefresh('refresh ok', $usuario, $request->getClientIp(), $request->header('User-Agent'), $desencryptado->continente, $desencryptado->pais, $desencryptado->ciudad, $desencryptado->latitud, $desencryptado->longitud);
+                    $this->arregloRetorno = $this->createTokenRefresh('refresh ok', $usuario, $request->getClientIp(), $request->header('User-Agent'), $desencriptado->continente, $desencriptado->pais, $desencriptado->ciudad, $desencriptado->latitud, $desencriptado->longitud);
                 }
             }
-            
-            
         } catch (Exception $e) {
             $this->arregloRetorno = ManejoData::armarDevolucion(500, false, "Error inesperado", null,  ManejoData::verificarExcepciones($e));
         } finally {
@@ -244,7 +154,7 @@ class UsuariosController extends Controller
             'usuario_agent' => $userAgent,
         ];
         $this->refreshTokenService->revocarTodosLosRefreshTokens($datos->id);
-        $resToken = $this->refreshTokenService->crearRefreshToken($tokenRefresh);
+        $resToken = $this->refreshTokenService->crear($tokenRefresh);
         if ($resToken) {
             return ManejoData::armarDevolucion(200, true, $msg, $token);
         } else {

@@ -4,14 +4,23 @@ namespace App\Services;
 
 use App\Models\Tablas\Permisos;
 
-class PermisoService
+class PermisoService extends Service
 {
-    public function crearPermiso(array $array, $usuario = null)
+    protected $allowedColumns = ['codigo', 'valor', 'fecha_inicio', 'fecha_fin', 'estado'];
+
+    public function __construct() {
+        parent::__construct(Permisos::class, $this->allowedColumns);
+    }
+
+    public function armarCuerpo($objetoLicencia, $array) {
+        isset($array['menu_id']) ? $objetoLicencia->menu_id = $array['menu_id'] : null;
+        isset($array['action']) ? $objetoLicencia->action = $array['action'] : null;
+    }
+
+    public function crear(array $array, $usuario = null)
     {
         $objetoPermiso = new Permisos();
-        $objetoPermiso->menu_id = $array['menu_id'];
-        $objetoPermiso->action = $array['action'];
-
+        $this->armarCuerpo($objetoPermiso, $array);
         isset($usuario) ? $objetoPermiso->usuario_creacion = $usuario->id : null;
 
         $objetoPermiso->save();
@@ -19,55 +28,14 @@ class PermisoService
         return $objetoPermiso;
     }
 
-    public function actualizarPermiso($id, array $array, $usuario = null)
+    public function actualizar($id, array $array, $usuario = null)
     {
         $objetoPermiso = Permisos::find($id);
-        isset($array['menu_id']) ? $objetoPermiso->menu_id = $array['menu_id'] : null;
-        isset($array['action']) ? $objetoPermiso->action = $array['action'] : null;
+        $this->armarCuerpo($objetoPermiso, $array);
         isset($usuario) ? $objetoPermiso->usuario_modificacion = $usuario->id : null;
         $objetoPermiso->save();
 
         return $objetoPermiso;
-    }
-
-    public function eliminarPermiso($id)
-    {
-        $objetoPermiso = Permisos::find($id);
-        if ($objetoPermiso) {
-            $objetoPermiso->delete();
-        }
-
-        return $objetoPermiso;
-    }
-
-    public function todo($ordenar, $tamaño = 0, $buscar = null)
-    {
-        $Permisos = Permisos::query();
-        $allowedColumns = ['action'];
-
-        if (!empty($buscar)) {
-            $Permisos->where(function ($q) use ($buscar, $allowedColumns) {
-                foreach ($allowedColumns as $columna) {
-                    $q->orWhere($columna, 'ILIKE', "%{$buscar}%");
-                }
-            });
-        }
-
-        $sorts = explode(',', $ordenar);
-        foreach ($sorts as $sort) {
-            [$column, $direction] = explode(':', $sort) + [null, 'asc'];
-            if (in_array($column, $allowedColumns) && in_array(strtolower($direction), ['asc', 'desc'])) {
-                $Permisos->orderBy($column, $direction);
-            }
-        }
-
-        return $Permisos->paginate($tamaño);
-        //return Permisos::all();
-    }
-
-    public function obtenerXId($id)
-    {
-        return Permisos::find($id);
     }
 
     function permisosUsuario($usuario)

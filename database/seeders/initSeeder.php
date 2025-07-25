@@ -16,7 +16,7 @@ class initSeeder extends Seeder
     {
         DB::table('roles')->insert([
             ['nombre' => 'Admin'],
-            ['nombre' => 'Usuario'],
+            ['nombre' => 'trabajador'],
             ['nombre' => 'Cliente'],
         ]);
 
@@ -45,9 +45,9 @@ class initSeeder extends Seeder
                 'rol_id' => 2
             ],
             [
-                'nombre' => 'Luis',
-                'apellidos' => 'manga',
-                'email' => 'luis@mail.com',
+                'nombre' => 'Mauricio',
+                'apellidos' => 'Ocampo',
+                'email' => 'mauricio@mail.com',
                 'password' => Hash::make('123456'),
                 'rol_id' => 3
             ]
