@@ -50,7 +50,7 @@ class UsuariosController extends Controller
             $encrypted = $request->header('-----------');
 
             if (!$encrypted) {
-                $this->arregloRetorno = ManejoData::armarDevolucion(400, false, "Refresh token encryp", null, 'refresh_token');
+                $this->arregloRetorno = ManejoData::armarDevolucion(400, false, "Refresh token encryp", null, 'token');
             } else {
                 $usuario = $this->service->obtenerXcorreo($data['correo']);
                 if ($usuario !== null) {
@@ -124,11 +124,12 @@ class UsuariosController extends Controller
                 $desencryptado = $this->desencriptado($encrypted);
                 $desencriptado = json_decode($desencryptado->original['desencriptado']);
                 $token = $this->refreshTokenService->obtenerXRefreshToken($refreshToken);
-                if (!$token) {
+                //$this->arregloRetorno = $token;
+                if (!is_object($token)) {
                     $this->arregloRetorno = ManejoData::armarDevolucion(404, false, "Token no encontrado", null, 'refresh_token');
                 } else {
-                    $usuario = $this->service->obtenerXId($request->usuario->id);
-
+                    $payload = $this->jwt->getPayload($token->refresh_token);
+                    $usuario = $this->service->obtenerXId($payload['sub']);
                     $this->arregloRetorno = $this->createTokenRefresh('refresh ok', $usuario, $request->getClientIp(), $request->header('User-Agent'), $desencriptado->continente, $desencriptado->pais, $desencriptado->ciudad, $desencriptado->latitud, $desencriptado->longitud);
                 }
             }
