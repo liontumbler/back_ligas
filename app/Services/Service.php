@@ -11,12 +11,12 @@ class Service
         $this->allowedColumns = $allowedColumns;
     }
 
-    protected function obtenerXId($id)
+    public function obtenerXId($id)
     {
         return $this->model::find($id);
     }
 
-    protected function eliminar($id)
+    public function eliminar($id)
     {
         $objetoLicencia = $this->model::find($id);
         if ($objetoLicencia) {
@@ -26,7 +26,7 @@ class Service
         return $objetoLicencia;
     }
 
-    protected function todo($usuario, $ordenar, $tamaño = 0, $buscar = null)
+    public function todo($usuario, $ordenar, $tamaño = 0, $buscar = null)
     {
         $Licencias = $this->model::where(function ($query) use ($usuario) {
             $query->where('usuario_creacion', $usuario->id)

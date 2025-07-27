@@ -14,35 +14,46 @@ class Jwt
         $this->usuarioService = new UsuarioService();
     }
 
-    public function verificarToken($authorization, $secret)
-    {
-        $devolucion = [];
+    public function getPayload ($authorization) {
         $token = substr($authorization, 7);
         $parts = explode('.', $token);
         [$headerB64, $payloadB64, $signatureB64] = $parts;
 
-        $payload = json_decode($this->base64url_decode($payloadB64), true);
-        $signature = hash_hmac('sha256', "$headerB64.$payloadB64", $secret, true);
-        $signatureCheckB64 = $this->base64url_encode($signature);
+        return json_decode($this->base64url_decode($payloadB64), true);
+    }
+
+    public function verificarToken($authorization, $secret)
+    {
+        $devolucion = [];
         if (!$authorization || !str_starts_with($authorization, 'Bearer ')) {
             $devolucion = ManejoData::armarDevolucion(401, false, 'Token no proporcionado Bearer', null, 'token autenticacion');
-        } elseif (count($parts) !== 3) {
-            $devolucion = ManejoData::armarDevolucion(401, false, 'Token inválido', null, 'token autenticacion');
-        } 
-        //validar que en la db exista por que no existe en la db y lo pasa
-        elseif (!hash_equals($signatureCheckB64, $signatureB64)) {
-            $devolucion = ManejoData::armarDevolucion(401, false, 'Firma inválida', null, 'token autenticacion');
-        } elseif (!$payload || $payload['exp'] < time()) {
-            $devolucion = ManejoData::armarDevolucion(401, false, 'Token expirado', null, 'token autenticacion');
         } else {
-            $user = $this->usuarioService->obtenerXId($payload['sub']);
-            if (!$user) {
-                $devolucion = ManejoData::armarDevolucion(401, false, 'Usuario no encontrado', null, 'token autenticacion');
+            $token = substr($authorization, 7);
+            $parts = explode('.', $token);
+            if (count($parts) !== 3) {
+                $devolucion = ManejoData::armarDevolucion(401, false, 'Token inválido', null, 'token autenticacion');
             } else {
-                $devolucion = ManejoData::armarDevolucion(200, true, 'Usuario encontrado', $user);
+
+                [$headerB64, $payloadB64, $signatureB64] = $parts;
+                
+                $payload = json_decode($this->base64url_decode($payloadB64), true);
+                $signature = hash_hmac('sha256', "$headerB64.$payloadB64", $secret, true);
+                $signatureCheckB64 = $this->base64url_decode($signature);
+
+                if (!hash_equals($signatureCheckB64, $signatureB64)) {
+                    $devolucion = ManejoData::armarDevolucion(401, false, 'Firma inválida', null, 'token autenticacion');
+                } elseif (!$payload || $payload['exp'] < time()) {
+                    $devolucion = ManejoData::armarDevolucion(401, false, 'Token expirado', null, 'token autenticacion');
+                } else {
+                    $user = $this->usuarioService->obtenerXId($payload['sub']);
+                    if (!$user) {
+                        $devolucion = ManejoData::armarDevolucion(401, false, 'Usuario no encontrado', null, 'token autenticacion');
+                    } else {
+                        $devolucion = ManejoData::armarDevolucion(200, true, 'Usuario encontrado', $user);
+                    }
+                }//validar que en la db exista por que no existe en la db y lo pasa
             }
         }
-
         return $devolucion;
     }
 
@@ -73,13 +84,13 @@ class Jwt
         return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
     }
 
-    public function renovarToken($refreshToken)
-    {
-        $verificaJwt = $this->verificarToken($refreshToken, config('services.jwt_secret_refresh'));
-        if ($verificaJwt['success']) {
-            return $this->generateToken($verificaJwt);
-        }
-    }
+    // public function renovarToken($refreshToken)
+    // {
+    //     $verificaJwt = $this->verificarToken($refreshToken, config('services.jwt_secret_refresh'));
+    //     if ($verificaJwt['success']) {
+    //         return $this->generateToken($verificaJwt);
+    //     }
+    // }
 
     public function generateToken($verificaJwt)
     {
