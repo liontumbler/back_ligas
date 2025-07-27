@@ -150,6 +150,7 @@ class UsuariosController extends Controller
             'longitud' => $longitud,
             'usuario_id' => $datos->id,
             'refresh_token' => $token['refresh_token'],
+            'access_token' => $token['access_token'],
             'ip_address' => $ip, //$request->ip(),
             'usuario_agent' => $userAgent,
         ];

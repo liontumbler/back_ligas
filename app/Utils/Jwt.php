@@ -3,20 +3,23 @@
 namespace App\Utils;
 
 use App\Services\UsuarioService;
+use App\Services\RefreshTokenService;
 use App\Utils\ManejoData;
 
 class Jwt
 {
     protected $usuarioService;
+    protected $refreshTokenService;
 
     public function __construct()
     {
         $this->usuarioService = new UsuarioService();
+        $this->refreshTokenService = new RefreshTokenService();
     }
 
     public function getPayload ($authorization) {
-        $token = substr($authorization, 7);
-        $parts = explode('.', $token);
+        $accessToken = substr($authorization, 7);
+        $parts = explode('.', $accessToken);
         [$headerB64, $payloadB64, $signatureB64] = $parts;
 
         return json_decode($this->base64url_decode($payloadB64), true);
@@ -28,30 +31,38 @@ class Jwt
         if (!$authorization || !str_starts_with($authorization, 'Bearer ')) {
             $devolucion = ManejoData::armarDevolucion(401, false, 'Token no proporcionado Bearer', null, 'token autenticacion');
         } else {
-            $token = substr($authorization, 7);
-            $parts = explode('.', $token);
-            if (count($parts) !== 3) {
-                $devolucion = ManejoData::armarDevolucion(401, false, 'Token inválido', null, 'token autenticacion');
+            $accessToken = substr($authorization, 7);
+            if (!$accessToken) {
+                $devolucion =  ManejoData::armarDevolucion(400, false, "Token inválido", null, 'access_token');
             } else {
-
-                [$headerB64, $payloadB64, $signatureB64] = $parts;
-                
-                $payload = json_decode($this->base64url_decode($payloadB64), true);
-                $signature = hash_hmac('sha256', "$headerB64.$payloadB64", $secret, true);
-                $signatureCheckB64 = $this->base64url_encode($signature);
-
-                if (!hash_equals($signatureCheckB64, $signatureB64)) {
-                    $devolucion = ManejoData::armarDevolucion(401, false, 'Firma inválida', null, 'token autenticacion');
-                } elseif (!$payload || $payload['exp'] < time()) {
-                    $devolucion = ManejoData::armarDevolucion(401, false, 'Token expirado', null, 'token autenticacion');
+                $token = $this->refreshTokenService->obtenerXAccessToken($accessToken);
+                if (!$token) {
+                    $devolucion =  ManejoData::armarDevolucion(404, false, "Token no encontrado", null, 'access_token');
                 } else {
-                    $user = $this->usuarioService->obtenerXId($payload['sub']);
-                    if (!$user) {
-                        $devolucion = ManejoData::armarDevolucion(401, false, 'Usuario no encontrado', null, 'token autenticacion');
+                    $parts = explode('.', $accessToken);
+                    if (count($parts) !== 3) {
+                        $devolucion = ManejoData::armarDevolucion(401, false, 'Token inválido', null, 'token autenticacion');
                     } else {
-                        $devolucion = ManejoData::armarDevolucion(200, true, 'Usuario encontrado', $user);
+                        [$headerB64, $payloadB64, $signatureB64] = $parts;
+                        
+                        $payload = json_decode($this->base64url_decode($payloadB64), true);
+                        $signature = hash_hmac('sha256', "$headerB64.$payloadB64", $secret, true);
+                        $signatureCheckB64 = $this->base64url_encode($signature);
+
+                        if (!hash_equals($signatureCheckB64, $signatureB64)) {
+                            $devolucion = ManejoData::armarDevolucion(401, false, 'Firma inválida', null, 'token autenticacion');
+                        } elseif (!$payload || $payload['exp'] < time()) {
+                            $devolucion = ManejoData::armarDevolucion(401, false, 'Token expirado', null, 'token autenticacion');
+                        } else {
+                            $user = $this->usuarioService->obtenerXId($payload['sub']);
+                            if (!$user) {
+                                $devolucion = ManejoData::armarDevolucion(401, false, 'Usuario no encontrado', null, 'token autenticacion');
+                            } else {
+                                $devolucion = ManejoData::armarDevolucion(200, true, 'Usuario encontrado', $user);
+                            }
+                        }
                     }
-                }//validar que en la db exista por que no existe en la db y lo pasa
+                }
             }
         }
         return $devolucion;
