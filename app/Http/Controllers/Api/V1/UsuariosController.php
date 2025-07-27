@@ -55,7 +55,7 @@ class UsuariosController extends Controller
                 $usuario = $this->service->obtenerXcorreo($data['correo']);
                 if ($usuario !== null) {
                     if (Hash::check($data['password'], $usuario['password'])) {
-                        $this->mail($usuario);
+                        //$this->mail($usuario);
 
                         $desencryptado = $this->desencriptado($encrypted);
                         $desencriptado = json_decode($desencryptado->original['desencriptado']);

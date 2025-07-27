@@ -38,7 +38,7 @@ class Jwt
                 
                 $payload = json_decode($this->base64url_decode($payloadB64), true);
                 $signature = hash_hmac('sha256', "$headerB64.$payloadB64", $secret, true);
-                $signatureCheckB64 = $this->base64url_decode($signature);
+                $signatureCheckB64 = $this->base64url_encode($signature);
 
                 if (!hash_equals($signatureCheckB64, $signatureB64)) {
                     $devolucion = ManejoData::armarDevolucion(401, false, 'Firma inválida', null, 'token autenticacion');
