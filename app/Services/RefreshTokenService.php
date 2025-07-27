@@ -23,6 +23,7 @@ class RefreshTokenService extends Service
         isset($array['longitud']) ? $objetoLicencia->longitud = $array['longitud'] : null;
         isset($array['usuario_id']) ? $objetoLicencia->usuario_id = $array['usuario_id'] : null;
         isset($array['refresh_token']) ? $objetoLicencia->refresh_token = $array['refresh_token'] : null;
+        isset($array['access_token']) ? $objetoLicencia->access_token = $array['access_token'] : null;
         isset($array['ip_address']) ? $objetoLicencia->ip_address = $array['ip_address'] : null;
         isset($array['usuario_agent']) ? $objetoLicencia->usuario_agent = $array['usuario_agent'] : null;
         isset($array['revoked']) ? $objetoLicencia->revoked = $array['revoked'] : null;
@@ -49,6 +50,11 @@ class RefreshTokenService extends Service
     public function obtenerXRefreshToken($refreshToken)
     {
         return RefreshTokens::where('refresh_token', $refreshToken)->first();
+    }
+
+    public function obtenerXAccessToken($accessToken)
+    {
+        return RefreshTokens::where('access_token', $accessToken)->first();
     }
 
     public function revocarTodosLosRefreshTokens($id)

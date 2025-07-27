@@ -24,7 +24,7 @@ abstract class Controller
         $this->reglaActualizar = $reglaActualizar;
     }
 
-    protected function index(Request $request)
+    public function index(Request $request)
     {
         try {
             $size = $request->input('size', '0');
@@ -39,7 +39,7 @@ abstract class Controller
         }
     }
 
-    protected function store(Request $request)
+    public function store(Request $request)
     {
         try {
             $data = $request->validate($this->reglaCrear);
@@ -53,7 +53,7 @@ abstract class Controller
         }
     }
 
-    protected function show($id)
+    public function show($id)
     {
         try {
             $licencia = $this->service->obtenerXId($id);
@@ -69,7 +69,7 @@ abstract class Controller
         }
     }
 
-    protected function update(Request $request, $id)
+    public function update(Request $request, $id)
     {
         try {
             $licencia = $this->service->obtenerXId($id);
@@ -91,7 +91,7 @@ abstract class Controller
         }
     }
 
-    protected function destroy($id)
+    public function destroy($id)
     {
         try {
             $licencia = $this->service->obtenerXId($id);
@@ -108,7 +108,7 @@ abstract class Controller
         }
     }
 
-    protected function mail($usuario) {
+    public function mail($usuario) {
         try {
             Mail::to($usuario->correo)
             ->send(new ClaveCajaMail('xxxx', $usuario->nombres));

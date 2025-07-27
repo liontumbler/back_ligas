@@ -51,11 +51,10 @@ class Service
             }
         }
 
-        return $tamaño > 0
-            ? $Licencias->paginate($tamaño)
-            : $Licencias->get();
-
-        //return $Licencias->paginate($tamaño);
+        return $Licencias->paginate($tamaño);
+        // return $tamaño > 0
+        //     ? $Licencias->paginate($tamaño)
+        //     : $Licencias->get();
         //return Licencias::all();
     }
 }

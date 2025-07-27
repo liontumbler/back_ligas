@@ -148,6 +148,7 @@ return new class extends Migration
 
         Schema::create('refresh_tokens', function (Blueprint $table) {
             $table->id();
+            $table->string('access_token');
             $table->string('refresh_token');
             $table->string('ip_address', 45);
             $table->string('usuario_agent');
