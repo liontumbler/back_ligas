@@ -33,11 +33,11 @@ class Jwt
         } else {
             $accessToken = substr($authorization, 7);
             if (!$accessToken) {
-                $devolucion =  ManejoData::armarDevolucion(400, false, "Token inválido", null, 'access_token');
+                $devolucion = ManejoData::armarDevolucion(401, false, "Token inválido", null, 'access_token');
             } else {
                 $token = $this->refreshTokenService->obtenerXAccessToken($accessToken);
                 if (!$token) {
-                    $devolucion =  ManejoData::armarDevolucion(404, false, "Token no encontrado", null, 'access_token');
+                    $devolucion = ManejoData::armarDevolucion(401, false, "Token no encontrado", null, 'access_token');
                 } else {
                     $parts = explode('.', $accessToken);
                     if (count($parts) !== 3) {
