@@ -47,12 +47,25 @@ return new class extends Migration
             $table->timestamp('fecha_modificacion')->nullable();
         });
 
+        Schema::create('equipos', function (Blueprint $table) {
+            $table->id();
+            $table->string('nombres', 100);
+            $table->string('entrenador', 100);
+            $table->foreignId('liga_id')->constrained('ligas')->onDelete('cascade');
+            $table->foreignId('usuario_creacion')->nullable()->constrained('usuarios');
+            $table->foreignId('usuario_modificacion')->nullable()->constrained('usuarios');
+            $table->timestamp('fecha_creacion')->nullable();
+            $table->timestamp('fecha_modificacion')->nullable();
+        });
+
         Schema::create('clientes', function (Blueprint $table) {
             $table->id();
             $table->string('nombres', 100);
             $table->string('apellidos', 100);
             $table->string('correo', 20)->unique();
             $table->string('telefono', 20)->nullable();
+            $table->foreignId('equipo_id')->nullable()->constrained('equipos')->onDelete('cascade');
+            $table->foreignId('plan_id')->nullable()->constrained('planes')->onDelete('cascade');
             $table->foreignId('liga_id')->constrained('ligas')->onDelete('cascade');
             $table->foreignId('usuario_creacion')->nullable()->constrained('usuarios');
             $table->foreignId('usuario_modificacion')->nullable()->constrained('usuarios');
@@ -62,11 +75,8 @@ return new class extends Migration
 
         Schema::create('pagos', function (Blueprint $table) {
             $table->id();
-            $table->enum('tipo', ['mensualidad', 'sesion']);
             $table->decimal('valor', 10, 2);
             $table->dateTime('fecha_pago')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->enum('estado', ['pagado', 'pendiente', 'vencido'])->default('pagado');
-            $table->foreignId('cliente_id')->constrained('clientes')->onDelete('cascade');
             $table->foreignId('liga_id')->constrained('ligas')->onDelete('cascade');
             $table->foreignId('usuario_creacion')->nullable()->constrained('usuarios');
             $table->foreignId('usuario_modificacion')->nullable()->constrained('usuarios');
@@ -74,13 +84,10 @@ return new class extends Migration
             $table->timestamp('fecha_modificacion')->nullable();
         });
 
-        Schema::create('mensualidades', function (Blueprint $table) {
+        Schema::create('planes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('cliente_id')->constrained('clientes')->onDelete('cascade');
-            $table->date('fecha_inicio');
-            $table->date('fecha_fin');
+            $table->decimal('valor', 10, 2);
             $table->integer('sesiones_disponibles');
-            $table->integer('sesiones_usadas')->default(0);
             $table->foreignId('liga_id')->constrained('ligas')->onDelete('cascade');
             $table->foreignId('usuario_creacion')->nullable()->constrained('usuarios');
             $table->foreignId('usuario_modificacion')->nullable()->constrained('usuarios');
@@ -90,10 +97,9 @@ return new class extends Migration
 
         Schema::create('entrenos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('cliente_id')->constrained('clientes')->onDelete('cascade');
+            $table->foreignId('cliente_id')->nullable()->constrained('clientes')->onDelete('cascade');
             $table->enum('tipo', ['individual', 'mensualidad', 'equipo']);
             $table->foreignId('pago_id')->nullable()->constrained('pagos')->onDelete('set null');
-            $table->foreignId('mensualidad_id')->nullable()->constrained('mensualidades')->onDelete('set null');
             $table->foreignId('liga_id')->constrained('ligas')->onDelete('cascade');
             $table->foreignId('usuario_creacion')->nullable()->constrained('usuarios');
             $table->foreignId('usuario_modificacion')->nullable()->constrained('usuarios');
