@@ -58,6 +58,17 @@ return new class extends Migration
             $table->timestamp('fecha_modificacion')->nullable();
         });
 
+        Schema::create('planes', function (Blueprint $table) {
+            $table->id();
+            $table->decimal('valor', 10, 2);
+            $table->integer('sesiones_disponibles');
+            $table->foreignId('liga_id')->constrained('ligas')->onDelete('cascade');
+            $table->foreignId('usuario_creacion')->nullable()->constrained('usuarios');
+            $table->foreignId('usuario_modificacion')->nullable()->constrained('usuarios');
+            $table->timestamp('fecha_creacion')->nullable();
+            $table->timestamp('fecha_modificacion')->nullable();
+        });
+
         Schema::create('clientes', function (Blueprint $table) {
             $table->id();
             $table->string('nombres', 100);
@@ -77,17 +88,6 @@ return new class extends Migration
             $table->id();
             $table->decimal('valor', 10, 2);
             $table->dateTime('fecha_pago')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->foreignId('liga_id')->constrained('ligas')->onDelete('cascade');
-            $table->foreignId('usuario_creacion')->nullable()->constrained('usuarios');
-            $table->foreignId('usuario_modificacion')->nullable()->constrained('usuarios');
-            $table->timestamp('fecha_creacion')->nullable();
-            $table->timestamp('fecha_modificacion')->nullable();
-        });
-
-        Schema::create('planes', function (Blueprint $table) {
-            $table->id();
-            $table->decimal('valor', 10, 2);
-            $table->integer('sesiones_disponibles');
             $table->foreignId('liga_id')->constrained('ligas')->onDelete('cascade');
             $table->foreignId('usuario_creacion')->nullable()->constrained('usuarios');
             $table->foreignId('usuario_modificacion')->nullable()->constrained('usuarios');
@@ -183,6 +183,8 @@ return new class extends Migration
         Schema::dropIfExists('mensualidades');
         Schema::dropIfExists('pagos');
         Schema::dropIfExists('clientes');
+        Schema::dropIfExists('planes');
+        Schema::dropIfExists('equipos');
         Schema::dropIfExists('permiso_rol');
         Schema::dropIfExists('permisos');
         Schema::dropIfExists('menus');
@@ -190,6 +192,5 @@ return new class extends Migration
         Schema::dropIfExists('usuarios');
         Schema::dropIfExists('ligas');
         Schema::dropIfExists('roles');
-
     }
 };
