@@ -22,7 +22,7 @@ class EntrenoService extends Service
 
     public function crear(array $array, $usuario = null)
     {
-        $objetoLEntreno = new Entrenos();
+        $objetoEntreno = new Entrenos();
         $this->armarCuerpo($objetoEntreno, $array);
         isset($usuario) ? $objetoEntreno->usuario_creacion = $usuario->id : null;
         $objetoEntreno->save();

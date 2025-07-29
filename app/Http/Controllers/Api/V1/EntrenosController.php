@@ -18,10 +18,10 @@ class EntrenosController extends Controller
 
     protected $reglaActualizar = [
         'cliente_id'        => 'sometimes|required|integer|exists:clientes,id',
-        'tipo'              => 'sometimes|nullable|in:individual,mensualidad,equipo',
+        'tipo'              => 'sometimes|required|in:individual,mensualidad,equipo',
         'pago_id'           => 'sometimes|nullable|integer|exists:pagos,id',
         'mensualidad_id'    => 'sometimes|nullable|integer|exists:mensualidades,id',
-        'liga_id'           => 'sometimes|nullable|integer|exists:ligas,id'
+        'liga_id'           => 'sometimes|required|integer|exists:ligas,id'
     ];
 
     public function __construct()
