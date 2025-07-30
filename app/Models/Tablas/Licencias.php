@@ -4,12 +4,7 @@ namespace App\Models\Tablas;
 
 use Illuminate\Database\Eloquent\Model;
 
-enum EstadoLicencia: string
-{
-    case Activa = 'activa';
-    case Inactiva = 'inactiva';
-    case Vencida = 'vencida';
-}
+use App\Enums\EstadoLicencia;
 
 class Licencias extends Model
 {

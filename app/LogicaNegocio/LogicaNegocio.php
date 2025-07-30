@@ -13,11 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-enum Alojar: string
-{
-    case PUBLIC = 'public';
-    case LOCAL = 'local';
-}
+use App\Enums\Alojar;
 
 class LogicaNegocio
 {
