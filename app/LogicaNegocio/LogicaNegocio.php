@@ -1,4 +1,5 @@
 <?php
+
 namespace App\LogicaNegocio;
 
 use Illuminate\Http\Request;
@@ -9,6 +10,14 @@ use App\Utils\ManejoData;
 use App\Mail\ClaveCajaMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
+enum Alojar: string
+{
+    case PUBLIC = 'public';
+    case LOCAL = 'local';
+}
 
 class LogicaNegocio
 {
@@ -108,14 +117,47 @@ class LogicaNegocio
         }
     }
 
-    public function mail($usuario) {
+    public function mail($usuario)
+    {
         try {
             Mail::to($usuario->correo)
-            ->send(new ClaveCajaMail('xxxx', $usuario->nombres));
+                ->send(new ClaveCajaMail('xxxx', $usuario->nombres));
             return 'bien';
         } catch (\Exception $e) {
             Log::error('Error al enviar el correo: ' . $e->getMessage());
             return 'mal';
         }
+    }
+
+    public function subirArchivo(Request $request, $guardar = false, Alojar $disk = Alojar::LOCAL)
+    {
+        $request->validate([
+            'archivos' => 'required|array',
+            'archivos.*' => 'file|max:10240', // máximo 10MB por archivo
+        ]);
+
+        $resultados = [];
+
+        foreach ($request->file('archivos') as $archivo) {
+            $contenido = file_get_contents($archivo);
+            $extension = $archivo->getClientOriginalExtension();
+            $mime = $archivo->getClientMimeType(); // MIME: image/png, application/pdf, etc.
+            $base64 = base64_encode($contenido);
+            $nombreArchivo = Str::uuid() . '.' . $extension;
+
+            $ruta = 'archivos_guardados/' . $nombreArchivo;
+
+            $resultados[] = [
+                'nombre_original' => $archivo->getClientOriginalName(),
+                'base64' => 'data:' . $mime . ';base64,' . $base64,
+            ];
+
+            if ($guardar) {
+                $resultados['ruta_archivo'] = storage_path('app/' . $ruta);
+                Storage::disk($disk)->put($ruta, $contenido);
+            }
+        }
+
+        return response()->json($resultados);
     }
 }
