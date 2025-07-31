@@ -6,7 +6,7 @@ use App\Models\Tablas\Entrenos;
 
 class EntrenoService extends Service
 {
-    protected $allowedColumns = ['cliente_id', 'tipo', 'pago_id', 'mensualidad_id', 'liga_id'];
+    protected $allowedColumns = ['cliente_id', 'tipo', 'pago_id', 'liga_id'];
 
     public function __construct() {
         parent::__construct(Entrenos::class, $this->allowedColumns);
@@ -16,7 +16,6 @@ class EntrenoService extends Service
         isset($array['cliente_id']) ? $objetoEntreno->cliente_id = $array['cliente_id'] : null;
         isset($array['tipo']) ? $objetoEntreno->tipo = $array['tipo'] : null;
         isset($array['pago_id']) ? $objetoEntreno->pago_id = $array['pago_id'] : null;
-        isset($array['mensualidad_id']) ? $objetoEntreno->mensualidad_id = $array['mensualidad_id'] : null;
         isset($array['liga_id']) ? $objetoEntreno->liga_id = $array['liga_id'] : null;
     }
 

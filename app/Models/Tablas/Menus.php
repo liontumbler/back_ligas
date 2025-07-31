@@ -20,18 +20,23 @@ class Menus extends Model
         'parent_id',
     ];
 
-    public function parent()
+    public function parent(): BelongsTo
     {
-        return $this->belongsTo(Menus::class, 'parent_id');
+        return $this->belongsTo(Menu::class, 'parent_id');
     }
 
-    public function children()
+    public function permisos(): HasMany
     {
-        return $this->hasMany(Menus::class, 'parent_id');
+        return $this->hasMany(Permiso::class);
     }
 
-    public function permisos()
+    public function creador()
     {
-        return $this->hasMany(Permisos::class);
+        return $this->belongsTo(Usuarios::class, 'usuario_creacion');
+    }
+
+    public function modificador()
+    {
+        return $this->belongsTo(Usuarios::class, 'usuario_modificacion');
     }
 }

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 use App\Models\Tablas\Clientes;
 use App\Models\Tablas\Pagos;
-use App\Models\Tablas\Mensualidades;
+
 
 class Entrenos extends Model
 {
@@ -19,9 +19,9 @@ class Entrenos extends Model
     public $incrementing    =   true;
     public $timestamps      =   true;
 
-    protected $fillable = ['cliente_id', 'fecha', 'tipo', 'pago_id', 'mensualidad_id'];
+    protected $fillable = ['cliente_id', 'fecha', 'tipo', 'pago_id',];
 
-    public function usuario()
+    public function cliente()
     {
         return $this->belongsTo(Clientes::class);
     }
@@ -29,8 +29,17 @@ class Entrenos extends Model
     {
         return $this->belongsTo(Pagos::class);
     }
-    public function mensualidad()
+
+    public function liga()
     {
-        return $this->belongsTo(Mensualidades::class);
+        return $this->belongsTo(Ligas::class);
+    }
+    public function creador()
+    {
+        return $this->belongsTo(usuarios::class);
+    }
+    public function modificador()
+    {
+        return $this->belongsTo(usuarios::class);
     }
 }
