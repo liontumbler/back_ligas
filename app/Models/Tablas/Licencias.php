@@ -20,6 +20,7 @@ class Licencias extends Model
     protected $fillable = ['codigo', 'valor', 'fecha_inicio', 'fecha_fin', 'estado'];
 
     protected $casts = [
+        'codigo' => 'string',
         'fecha_inicio' => 'date',
         'fecha_fin' => 'date',
         'valor' => 'decimal:2',
