@@ -73,7 +73,7 @@ return new class extends Migration
             $table->id();
             $table->string('nombres', 100);
             $table->string('apellidos', 100);
-            $table->string('correo', 20)->unique();
+            $table->string('correo', 100)->unique();
             $table->string('telefono', 20)->nullable();
             $table->foreignId('equipo_id')->nullable()->constrained('equipos')->onDelete('cascade');
             $table->foreignId('plan_id')->nullable()->constrained('planes')->onDelete('cascade');

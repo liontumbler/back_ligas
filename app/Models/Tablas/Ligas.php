@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models\Tablas;
 
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +17,12 @@ class Ligas extends Model
     public $timestamps      =   true;
 
     protected $fillable = ['nombre', 'direccion', 'telefono',];
+
+    protected $casts = [
+        'nombre' => 'string',
+        'direccion' => 'string',
+        'telefono' => 'string'
+    ];
 
     public function usuarios(): HasMany
     {

@@ -17,6 +17,8 @@ class ClienteService extends Service
         isset($array['apellidos']) ? $objetoCliente->apellidos = $array['apellidos'] : null;
         isset($array['correo']) ? $objetoCliente->correo = $array['correo'] : null;
         isset($array['telefono']) ? $objetoCliente->telefono = $array['telefono'] : null;
+        isset($array['equipo_id']) ? $objetoCliente->equipo_id = $array['equipo_id'] : null;
+        isset($array['plan_id']) ? $objetoCliente->plan_id = $array['plan_id'] : null;
         isset($array['liga_id']) ? $objetoCliente->liga_id = $array['liga_id'] : null;
     }
 
