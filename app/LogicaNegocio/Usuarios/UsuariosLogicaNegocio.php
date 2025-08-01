@@ -8,6 +8,7 @@ use Exception;
 use App\Utils\ManejoData;
 use App\Utils\Jwt;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 use App\Services\UsuarioService;
@@ -62,7 +63,7 @@ class UsuariosLogicaNegocio extends LogicaNegocio
 
                         $this->arregloRetorno = $this->createTokenRefresh('Login ok', $usuario, $request->getClientIp(), $request->header('User-Agent'), $desencriptado->continente, $desencriptado->pais, $desencriptado->ciudad, $desencriptado->latitud, $desencriptado->longitud);
                     } else {
-                        $this->arregloRetorno = ManejoData::armarDevolucion(400, true, "datos incorrectos", $usuario, 'datos incorrectos');
+                        $this->arregloRetorno = ManejoData::armarDevolucion(400, true, "datos incorrectos", null, 'datos incorrectos');
                     }
                 } else {
                     $this->arregloRetorno = ManejoData::armarDevolucion(400, true, "datos incorrectos", null, 'datos incorrectos');
