@@ -17,16 +17,16 @@ class Pagos extends Model
     public $incrementing    =   true;
     public $timestamps      =   true;
 
-    protected $fillable = ['cliente_id', 'tipo', 'valor', 'fecha_pago', 'estado'];
+    protected $fillable = ['valor', 'fecha_pago', 'liga_id'];
 
-    public function cliente()
+    public function liga(): BelongsTo
     {
-        return $this->belongsTo(Clientes::class);
+        return $this->belongsTo(Liga::class);
     }
 
-    public function liga()
+    public function entrenos(): HasMany
     {
-        return $this->belongsTo(Ligas::class);
+        return $this->hasMany(Entreno::class);
     }
 
     public function creador()

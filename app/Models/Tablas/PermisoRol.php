@@ -15,8 +15,25 @@ class PermisoRol extends Model
     public $incrementing    =   true;
     public $timestamps      =   true;
 
-    protected $fillable = [
-        'role_id',
-        'permission_id',
-    ];
+    protected $fillable = ['rol_id', 'permiso_id'];
+
+    public function rol(): BelongsTo
+    {
+        return $this->belongsTo(Rol::class);
+    }
+
+    public function permiso(): BelongsTo
+    {
+        return $this->belongsTo(Permiso::class);
+    }
+
+        public function creador()
+    {
+        return $this->belongsTo(Usuarios::class, 'usuario_creacion');
+    }
+
+    public function modificador()
+    {
+        return $this->belongsTo(Usuarios::class, 'usuario_modificacion');
+    }
 }

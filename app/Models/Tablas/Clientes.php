@@ -3,9 +3,10 @@
 namespace App\Models\Tablas;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 use App\Models\Tablas\Pagos;
-use App\Models\Tablas\Mensualidades;
 use App\Models\Tablas\Entrenos;
 
 class Clientes extends Model
@@ -21,16 +22,28 @@ class Clientes extends Model
 
     protected $fillable = ['nombres', 'apellidos', 'correo', 'telefono', 'liga_id'];
 
-    public function pagos()
+    public function equipo()
     {
-        return $this->hasMany(Pagos::class);
+        return $this->BelongsTo(Equipos::class);
     }
-    public function mensualidades()
+    public function plan()
     {
-        return $this->hasMany(Mensualidades::class);
+        return $this->BelongsTo(planes::class);
     }
-    public function entrenos()
+    public function liga()
     {
-        return $this->hasMany(Entrenos::class);
+        return $this->BelongsTo(Ligas::class);
+    }
+    public function entreno()
+    {
+        return $this->hasMany(entrenos::class);
+    }
+    public function creador()
+    {
+        return $this->belongsTo(Usuarios::class, 'usuario_creacion');
+    }
+    public function modificador()
+    {
+        return $this->belongsTo(Usuarios::class, 'usuario_modificacion');
     }
 }

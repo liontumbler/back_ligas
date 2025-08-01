@@ -7,28 +7,26 @@ use Illuminate\Http\Request;
 use Exception;
 use App\Utils\ManejoData;
 
-use App\Services\LigaService;
+use App\Services\RolesService;
 
-class LigasController extends Controller
+class RolesController extends Controller
 {
-    protected $ligaService;
+    protected $rolesService;
     protected $arregloRetorno = [];
 
     protected $reglaCrear = [
-        'nombre' => 'required|string|max:100',
-        'direccion' => 'nullable|string|max:100',
-        'telefono' => 'nullable|string|max:20'
+        'nombre' => 'required|string|max:100|unique:roles,nombre',
+
     ];
 
     protected $reglaActualizar = [
-        'nombre'    => 'sometimes|required|string|max:100',
-        'direccion' => 'sometimes|nullable|string|max:100',
-        'telefono'  => 'sometimes|nullable|string|max:20'
+        'nombre'    => 'sometimes|required|string|max:100|unique:roles,nombre',
+
     ];
 
     public function __construct()
     {
-        $this->ligaService = new LigaService();
+        $this->rolService = new RolService();
     }
 
     public function index(Request $request)
@@ -38,7 +36,7 @@ class LigasController extends Controller
             $sort = $request->input('sort', 'id:asc');
             $filter = $request->input('filter', null);
             $ligas = $this->ligaService->todo($sort, $size, $filter);
-            $this->arregloRetorno = ManejoData::armarDevolucion(200, true, "Se muestra con exito", $ligas);
+            $this->arregloRetorno = ManejoData::armarDevolucion(200, true, "Se muestra con exito", $roles);
         } catch (Exception $e) {
             $this->arregloRetorno = ManejoData::armarDevolucion(500, false, "Error inesperado", null, ManejoData::verificarExcepciones($e));
         } finally {

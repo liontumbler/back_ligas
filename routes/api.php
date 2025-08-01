@@ -6,12 +6,16 @@ use App\Http\Controllers\Api\V1\LigasController;
 use App\Http\Controllers\Api\V1\UsuariosController;
 use App\Http\Controllers\Api\V1\LicenciasController;
 use App\Http\Controllers\Api\V1\ClientesController;
+use App\Http\Controllers\Api\V1\EntrenosController;
+use App\Http\Controllers\Api\V1\RolesController;
 
 Route::middleware(['JWT'])->group(function () {
     Route::apiResource('licencias', LicenciasController::class);
     Route::apiResource('ligas', LigasController::class);
     Route::apiResource('usuarios', UsuariosController::class);
     Route::apiResource('clientes', ClientesController::class);
+    Route::apiResource('entrenos', EntrenosController::class);
+    Route::apiResource('roles', RolesController::class);
 });
 
 Route::post('login', [UsuariosController::class, 'login']);
