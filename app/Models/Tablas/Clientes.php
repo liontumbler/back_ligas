@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models\Tablas;
 
 use Illuminate\Database\Eloquent\Model;
@@ -20,7 +19,25 @@ class Clientes extends Model
     public $incrementing    =   true;
     public $timestamps      =   true;
 
-    protected $fillable = ['nombres', 'apellidos', 'correo', 'telefono', 'liga_id'];
+    protected $fillable = [
+        'nombres', 
+        'apellidos', 
+        'correo', 
+        'telefono', 
+        'equipo_id', 
+        'plan_id', 
+        'liga_id'
+    ];
+
+    protected $casts = [
+        'nombres' => 'string',
+        'apellidos' => 'string',
+        'correo' => 'string',
+        'telefono' => 'string',
+        'equipo_id' => 'integer',
+        'plan_id' => 'integer',
+        'liga_id' => 'integer'
+    ];
 
     public function equipo()
     {
