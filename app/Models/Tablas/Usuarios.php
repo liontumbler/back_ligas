@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models\Tablas;
 
 use Illuminate\Database\Eloquent\Model;
@@ -25,6 +24,15 @@ class Usuarios extends Model
 
     protected $hidden = [
         'password'
+    ];
+
+    protected $casts = [
+        'nombres' => 'string',
+        'apellidos' => 'string',
+        'correo' => 'string',
+        'password' => 'string',
+        'liga_id' => 'integer',
+        'rol_id' => 'integer',
     ];
 
     public function liga()

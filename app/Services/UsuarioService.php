@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Services;
 
 use App\Models\Tablas\Usuarios;
@@ -7,10 +6,7 @@ use Illuminate\Support\Facades\Hash;
 
 class UsuarioService extends Service
 {
-    protected $allowedColumns = ['continente', 'pais', 'ciudad',
-            'latitud', 'longitud', 'usuario_id',
-            'refresh_token', 'ip_address', 'usuario_agent',
-            'revoked'];
+    protected $allowedColumns = ['nombres', 'apellidos', 'correo'];
 
     public function __construct() {
         parent::__construct(Usuarios::class, $this->allowedColumns);
