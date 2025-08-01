@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Tablas\Clientes;
 use App\Models\Tablas\Pagos;
 
+use App\Enums\TipoEntreno;
 
 class Entrenos extends Model
 {
@@ -19,7 +20,14 @@ class Entrenos extends Model
     public $incrementing    =   true;
     public $timestamps      =   true;
 
-    protected $fillable = ['cliente_id', 'fecha', 'tipo', 'pago_id',];
+    protected $fillable = ['cliente_id', 'tipo', 'pago_id', 'liga_id',];
+
+    protected $casts = [
+        'cliente_id' => 'integer',
+        'tipo' => TipoEntreno::class,
+        'pago_id' => 'integer',
+        'liga_id' => 'integer',
+    ];
 
     public function cliente()
     {

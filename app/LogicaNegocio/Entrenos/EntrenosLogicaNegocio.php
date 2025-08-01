@@ -6,7 +6,7 @@ use App\Services\EntrenoService;
 
 class EntrenosLogicaNegocio extends LogicaNegocio
 {
-        protected $reglaCrear = [
+    protected $reglaCrear = [
         'cliente_id'        => 'nullable|integer|exists:clientes,id',
         'tipo'              => 'required|in:individual,mensualidad,equipo',
         'pago_id'           => 'nullable|integer|exists:pagos,id',
@@ -19,7 +19,8 @@ class EntrenosLogicaNegocio extends LogicaNegocio
         'pago_id'           => 'sometimes|nullable|integer|exists:pagos,id',
         'liga_id'           => 'sometimes|required|integer|exists:ligas,id'
     ];
-        public function __construct()
+
+    public function __construct()
     {
         parent::__construct(new EntrenoService(), $this->reglaCrear, $this->reglaActualizar);
     }
