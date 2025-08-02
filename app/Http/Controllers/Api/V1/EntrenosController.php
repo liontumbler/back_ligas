@@ -9,6 +9,6 @@ class EntrenosController extends Controller
 {
     public function __construct()
     {
-        parent::__construct(new EntrenosService());
+        parent::__construct(new EntrenosLogicaNegocio());
     }
 }
