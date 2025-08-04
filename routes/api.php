@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\UsuariosController;
 use App\Http\Controllers\Api\V1\LicenciasController;
 use App\Http\Controllers\Api\V1\ClientesController;
 use App\Http\Controllers\Api\V1\EntrenosController;
+use App\Http\Controllers\Api\V1\MenusController;
 use App\Http\Controllers\Api\V1\RolesController;
 
 Route::middleware(['JWT'])->group(function () {
@@ -15,6 +16,7 @@ Route::middleware(['JWT'])->group(function () {
     Route::apiResource('usuarios', UsuariosController::class);
     Route::apiResource('clientes', ClientesController::class);
     Route::apiResource('entrenos', EntrenosController::class);
+    Route::apiResource('menus', MenusController::class);
     Route::apiResource('roles', RolesController::class);
 });
 
