@@ -84,5 +84,8 @@ class initSeeder extends Seeder
             ['rol_id' => 2, 'permiso_id' => 1],
             ['rol_id' => 2, 'permiso_id' => 3],
         ]);
+
+        DB::statement("SELECT setval('menus_id_seq', (SELECT MAX(id) FROM menus))");
+        DB::statement("SELECT setval('permisos_id_seq', (SELECT MAX(id) FROM permisos))");
     }
 }

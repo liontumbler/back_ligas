@@ -3,6 +3,9 @@
 namespace App\Models\Tablas;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 
 class Menus extends Model
 {
@@ -15,14 +18,16 @@ class Menus extends Model
     public $incrementing    =   true;
     public $timestamps      =   true;
 
-    protected $fillable = [
-        'name',
-        'parent_id',
+    protected $fillable = ['nombre', 'parent_id'];
+
+    protected $casts = [
+        'nombre' => 'string',
+        'parent_id' => 'integer',
     ];
 
     public function parent(): BelongsTo
     {
-        return $this->belongsTo(Menu::class, 'parent_id');
+        return $this->belongsTo(Menus::class, 'parent_id');
     }
 
     public function children()
