@@ -110,13 +110,13 @@ class UsuariosLogicaNegocio extends LogicaNegocio
     {
         try {
             $authorization = $request->header('Authorization');
-            $encrypted = $request->header('-----------');
-
+            
             $refreshToken = '';
             if ($authorization && str_starts_with($authorization, 'Bearer ')) {
                 $refreshToken = substr($authorization, 7);
             }
 
+            $encrypted = $request->header('-----------');
             if (!$encrypted) {
                 $this->arregloRetorno = ManejoData::armarDevolucion(400, false, "Refresh token encryp", null, 'refresh_token');
             } elseif (!$refreshToken) {
@@ -126,7 +126,7 @@ class UsuariosLogicaNegocio extends LogicaNegocio
                 $desencriptado = json_decode($desencryptado->original['desencriptado']);
                 $token = $this->refreshTokenService->obtenerXRefreshToken($refreshToken);
                 //$this->arregloRetorno = $token;
-                if (!is_object($token)) {
+                if (!$token) {
                     $this->arregloRetorno = ManejoData::armarDevolucion(404, false, "Token no encontrado", null, 'refresh_token');
                 } else {
                     $payload = $this->jwt->getPayload($token->refresh_token);
