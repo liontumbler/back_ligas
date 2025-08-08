@@ -3,8 +3,9 @@
 namespace App\Models\Tablas;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-use App\Models\Tablas\Clientes;
 
 class Pagos extends Model
 {
@@ -18,6 +19,12 @@ class Pagos extends Model
     public $timestamps      =   true;
 
     protected $fillable = ['valor', 'fecha_pago', 'liga_id'];
+
+    protected $casts = [
+        'valor' => 'decimal:2',
+        'fecha_pago' => 'datetime',
+        'liga_id' => 'integer',
+    ];
 
     public function liga(): BelongsTo
     {

@@ -6,17 +6,16 @@ use App\Models\Tablas\Pagos;
 
 class PagoService extends Service
 {
-    protected $allowedColumns = ['codigo', 'valor', 'fecha_inicio', 'fecha_fin', 'estado'];
+    protected $allowedColumns = ['valor', 'fecha_pago', 'liga_id'];
 
     public function __construct() {
         parent::__construct(Pagos::class, $this->allowedColumns);
     }
 
-    public function armarCuerpo($objetoLicencia, $array) {
-        isset($array['cliente_id']) ? $objetoLicencia->cliente_id = $array['cliente_id'] : null;
-        isset($array['tipo']) ? $objetoLicencia->tipo = $array['tipo'] : null;
-        isset($array['valor']) ? $objetoLicencia->valor = $array['valor'] : null;
-        isset($array['estado']) ? $objetoLicencia->estado = $array['estado'] : null;
+    public function armarCuerpo($objetoPago, $array) {
+        isset($array['valor']) ? $objetoPago->valor = $array['valor'] : null;
+        isset($array['fecha_pago']) ? $objetoPago->fecha_pago = $array['fecha_pago'] : null;
+        isset($array['liga_id']) ? $objetoPago->liga_id = $array['liga_id'] : null;
     }
 
     public function crear(array $array, $usuario = null)
