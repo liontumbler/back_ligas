@@ -1079,6 +1079,68 @@ Fecha de entrada en vigencia: [●]
 
         ////////////////////////////////////////////////////////////////////////////////
         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        import React, { useState } from "react";
+
+function DynamicInputs() {
+  const [inputs, setInputs] = useState([{ value: "" }]);
+
+  const handleAddInput = () => {
+    setInputs([...inputs, { value: "" }]);
+  };
+
+  const handleRemoveInput = (index) => {
+    const updatedInputs = inputs.filter((_, i) => i !== index);
+    setInputs(updatedInputs);
+  };
+
+  const handleChange = (index, event) => {
+    const updatedInputs = [...inputs];
+    updatedInputs[index].value = event.target.value;
+    setInputs(updatedInputs);
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    console.log("Valores:", inputs.map((input) => input.value));
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {inputs.map((input, index) => (
+        <div key={index}>
+          <input
+            type="text"
+            value={input.value}
+            onChange={(event) => handleChange(index, event)}
+          />
+          <button type="button" onClick={() => handleRemoveInput(index)}>
+            Eliminar
+          </button>
+        </div>
+      ))}
+      <button type="button" onClick={handleAddInput}>
+        Agregar Input
+      </button>
+      <button type="submit">Enviar</button>
+    </form>
+  );
+}
+
+export default DynamicInputs;
     </script>
 </body>
 
