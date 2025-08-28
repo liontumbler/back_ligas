@@ -1,3 +1,36 @@
+private function assembleBasicArrayFile($itemInfoAttachment): array
+    {
+        $fileName = pathinfo($itemInfoAttachment->getClientOriginalName(), PATHINFO_FILENAME);
+        $fileExtension = $itemInfoAttachment->getClientOriginalExtension();
+        $hexContent = bin2hex(file_get_contents($itemInfoAttachment));
+
+        $file = [];
+        $file['file_name'] = $fileName;
+        $file['type'] = $fileExtension;
+        $file['file'] = DB::raw("decode('{$hexContent}', 'hex')");
+        return $file;
+    }
+
+    /**
+     * Función para almacenar los documentos adjuntos de Items
+     * @param array $data - datos a utilizar
+     * @return array
+     */
+    public function storeAttachments(array $data, $user): array
+    {
+        return DB::transaction(function () use ($data, $user) {
+            $itemInfoAttachment = $data['file'];
+            if ($itemInfoAttachment) {
+                $newFile = $this->assembleBasicArrayFile($itemInfoAttachment);
+                $newFile['user_id'] = $user->id;
+                $newFile['created_by'] = auth()->user()->id;
+                $newFile['updated_by'] = auth()->user()->id;
+                UserAttachment::create($newFile);
+            }
+            return [];
+        });
+    }
+
 <!DOCTYPE html>
 <html lang="en">
 
