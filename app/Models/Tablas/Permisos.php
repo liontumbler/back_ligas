@@ -29,7 +29,7 @@ class Permisos extends Model
 
     public function roles()
     {
-        return $this->belongsToMany(Roles::class, 'permiso_rol', 'permission_id', 'role_id')
-                    ->withTimestamps();
+        return $this->belongsToMany(Roles::class, 'permiso_rol', 'permiso_id', 'rol_id')
+            ->withPivot(['usuario_creacion', 'usuario_modificacion', 'fecha_creacion', 'fecha_modificacion']);
     }
 }

@@ -143,6 +143,7 @@ class UsuariosLogicaNegocio extends LogicaNegocio
 
     private function createTokenRefresh($msg, $datos, $ip, $userAgent, $continente, $pais, $ciudad, $latitud, $longitud) {
         $token = $this->jwt->generateToken($datos);
+        $token['user'] = $datos;
         $tokenRefresh = [
             'continente' => $continente,
             'pais' => $pais,

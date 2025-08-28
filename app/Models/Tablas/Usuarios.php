@@ -16,6 +16,7 @@ class Usuarios extends Model
     public $timestamps      =   true;
 
     protected $fillable = [
+        'liga_id',
         'nombres',
         'apellidos',
         'correo',
@@ -23,7 +24,8 @@ class Usuarios extends Model
     ];
 
     protected $hidden = [
-        'password'
+        'password',
+        'rol'
     ];
 
     protected $casts = [
@@ -34,6 +36,21 @@ class Usuarios extends Model
         'liga_id' => 'integer',
         'rol_id' => 'integer',
     ];
+
+    protected $appends = [
+        'rol_name',
+        'permisos_rol'
+    ];
+
+    public function getRolNameAttribute()
+    {
+        return $this->rol->nombre;
+    }
+
+    public function getPermisosRolAttribute()
+    {
+        return $this->rol ? $this->rol->permisos : collect();
+    }
 
     public function liga()
     {
@@ -67,6 +84,6 @@ class Usuarios extends Model
 
     public function permisos()
     {
-        return $this->rol ? $this->rol->permisos() : collect();
+        return $this->rol ? $this->rol->permisos : collect();
     }
 }
