@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\ClientesController;
 use App\Http\Controllers\Api\V1\EntrenosController;
 use App\Http\Controllers\Api\V1\MenusController;
 use App\Http\Controllers\Api\V1\RolesController;
+use App\Http\Controllers\Api\V1\Permi;
 
 Route::middleware(['JWT'])->group(function () {
     Route::apiResource('licencias', LicenciasController::class);
@@ -18,6 +19,7 @@ Route::middleware(['JWT'])->group(function () {
     Route::apiResource('entrenos', EntrenosController::class);
     Route::apiResource('menus', MenusController::class);
     Route::apiResource('roles', RolesController::class);
+    Route::apiResource('permiso-rol', RolesController::class);
 });
 
 Route::post('login', [UsuariosController::class, 'login']);

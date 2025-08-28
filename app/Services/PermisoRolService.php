@@ -4,8 +4,39 @@ namespace App\Services;
 
 use App\Models\Tablas\Permisos;
 
-class PermisoService
+class PermisoService extends Service
 {
+    protected $allowedColumns = ['rol_id', 'permiso_id'];
+
+    public function __construct() {
+        parent::__construct(Clientes::class, $this->allowedColumns);
+    }
+
+    public function armarCuerpo($objetoCliente, $array) {
+        isset($array['rol_id']) ? $objetoCliente->rol_id = $array['rol_id'] : null;
+        isset($array['permiso_id']) ? $objetoCliente->permiso_id = $array['permiso_id'] : null;
+    }
+
+    public function crear(array $array, $usuario = null)
+    {
+        $objetoCliente = new Clientes();
+        $this->armarCuerpo($objetoCliente, $array);
+        isset($usuario) ? $objetoCliente->usuario_creacion = $usuario->id : null;
+        $objetoCliente->save();
+
+        return $objetoCliente;
+    }
+
+    public function actualizar($id, array $array, $usuario = null)
+    {
+        $objetoCliente = Clientes::find($id);
+        $this->armarCuerpo($objetoCliente, $array);
+        isset($usuario) ? $objetoCliente->usuario_modificacion = $usuario->id : null;
+        $objetoCliente->save();
+
+        return $objetoCliente;
+    }
+
     public function crearPermiso(array $array, $usuario = null)
     {
         $objetoPermiso = new Permisos();

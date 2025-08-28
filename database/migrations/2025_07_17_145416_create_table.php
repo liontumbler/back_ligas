@@ -110,6 +110,7 @@ return new class extends Migration
         Schema::create('menus', function (Blueprint $table) {
             $table->id();
             $table->string('nombre', 100);
+            $table->string('url', 255)->nullable();
             $table->foreignId('parent_id')->nullable()->constrained('menus')->onDelete('cascade');
             $table->foreignId('usuario_creacion')->nullable()->constrained('usuarios');
             $table->foreignId('usuario_modificacion')->nullable()->constrained('usuarios');
