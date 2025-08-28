@@ -31,6 +31,27 @@ private function assembleBasicArrayFile($itemInfoAttachment): array
         });
     }
 
+
+    @js(export const openApiUrl = (pathFile: string): void => {
+  const baseApiUrl: string = import.meta.env.VITE_API_BASE_URL
+  const baseApi = baseApiUrl.split('/api')[0]
+
+  const urlFile = `${baseApi}/${pathFile}`
+
+  // Crea un elemento <a> y dispara el evento de clic para iniciar la descarga
+  const link = document.createElement('a')
+
+  link.href = urlFile
+  link.setAttribute('download', '')
+
+  // Para descargar archivos en la misma pestaña del navegador:
+  link.target = '_blank'
+
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+})
+
 <!DOCTYPE html>
 <html lang="en">
 
