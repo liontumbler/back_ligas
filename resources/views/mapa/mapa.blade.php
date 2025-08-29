@@ -110,6 +110,25 @@ private function assembleBasicArrayFile($itemInfoAttachment): array
   document.body.removeChild(link)
 })
 
+
+------------------------------------------------------------------------------------------------
+
+navigator.geolocation.getCurrentPosition(
+  (pos) => {
+    console.log("Lat:", pos.coords.latitude);
+    console.log("Lng:", pos.coords.longitude);
+    console.log("Precisión estimada:", pos.coords.accuracy, "metros");
+  },
+  (err) => {
+    console.error("Error:", err.message);
+  },
+  {
+    enableHighAccuracy: true, // 🚀 intenta usar GPS en móviles
+    timeout: 10000,           // tiempo máximo de espera
+    maximumAge: 0             // no usar caché
+  }
+);
+
 <!DOCTYPE html>
 <html lang="en">
 
