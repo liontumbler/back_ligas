@@ -1,3 +1,61 @@
+npm install i18next react-i18next
+npm install i18next-browser-languagedetector
+
+// App.tsx
+import React from "react";
+import { useTranslation } from "react-i18next";
+import "./i18n";
+
+function App() {
+  const { t, i18n } = useTranslation();
+
+  return (
+    <div style={{ padding: 20 }}>
+      <h1>{t("welcome")}</h1>
+      <p>{t("message")}</p>
+
+      <select
+        value={i18n.language}
+        onChange={(e) => i18n.changeLanguage(e.target.value)}
+      >
+        <option value="en">English</option>
+        <option value="es">Español</option>
+      </select>
+    </div>
+  );
+}
+
+export default App;
+
+------------------------------------------------------------------------------------------------
+temedark
+
+const [darkMode, setDarkMode] = useState(false);
+
+  // Al cargar la app, revisamos el tema guardado en localStorage
+  useEffect(() => {
+    const storedTheme = localStorage.getItem("theme");
+    if (storedTheme) {
+      setDarkMode(storedTheme === "dark");
+    } else {
+      // Si no hay nada guardado, usamos el tema del sistema
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setDarkMode(prefersDark);
+    }
+  }, []);
+
+  // Cada vez que cambie el tema, lo guardamos en localStorage
+  useEffect(() => {
+    localStorage.setItem("theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
+
+  const toggleTheme = () => setDarkMode((prev) => !prev);
+
+  return (
+    <ThemeContext.Provider value={{ darkMode, toggleTheme }}>
+
+
+------------------------------------------------------------------------------------------------
 private function assembleBasicArrayFile($itemInfoAttachment): array
     {
         $fileName = pathinfo($itemInfoAttachment->getClientOriginalName(), PATHINFO_FILENAME);
