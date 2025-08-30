@@ -1,3 +1,134 @@
+npm install i18next react-i18next
+npm install i18next-browser-languagedetector
+
+// App.tsx
+import React from "react";
+import { useTranslation } from "react-i18next";
+import "./i18n";
+
+function App() {
+  const { t, i18n } = useTranslation();
+
+  return (
+    <div style={{ padding: 20 }}>
+      <h1>{t("welcome")}</h1>
+      <p>{t("message")}</p>
+
+      <select
+        value={i18n.language}
+        onChange={(e) => i18n.changeLanguage(e.target.value)}
+      >
+        <option value="en">English</option>
+        <option value="es">Español</option>
+      </select>
+    </div>
+  );
+}
+
+export default App;
+
+------------------------------------------------------------------------------------------------
+temedark
+
+const [darkMode, setDarkMode] = useState(false);
+
+  // Al cargar la app, revisamos el tema guardado en localStorage
+  useEffect(() => {
+    const storedTheme = localStorage.getItem("theme");
+    if (storedTheme) {
+      setDarkMode(storedTheme === "dark");
+    } else {
+      // Si no hay nada guardado, usamos el tema del sistema
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setDarkMode(prefersDark);
+    }
+  }, []);
+
+  // Cada vez que cambie el tema, lo guardamos en localStorage
+  useEffect(() => {
+    localStorage.setItem("theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
+
+  const toggleTheme = () => setDarkMode((prev) => !prev);
+
+  return (
+    <ThemeContext.Provider value={{ darkMode, toggleTheme }}>
+
+
+------------------------------------------------------------------------------------------------
+private function assembleBasicArrayFile($itemInfoAttachment): array
+    {
+        $fileName = pathinfo($itemInfoAttachment->getClientOriginalName(), PATHINFO_FILENAME);
+        $fileExtension = $itemInfoAttachment->getClientOriginalExtension();
+        $hexContent = bin2hex(file_get_contents($itemInfoAttachment));
+
+        $file = [];
+        $file['file_name'] = $fileName;
+        $file['type'] = $fileExtension;
+        $file['file'] = DB::raw("decode('{$hexContent}', 'hex')");
+        return $file;
+    }
+
+    /**
+     * Función para almacenar los documentos adjuntos de Items
+     * @param array $data - datos a utilizar
+     * @return array
+     */
+    public function storeAttachments(array $data, $user): array
+    {
+        return DB::transaction(function () use ($data, $user) {
+            $itemInfoAttachment = $data['file'];
+            if ($itemInfoAttachment) {
+                $newFile = $this->assembleBasicArrayFile($itemInfoAttachment);
+                $newFile['user_id'] = $user->id;
+                $newFile['created_by'] = auth()->user()->id;
+                $newFile['updated_by'] = auth()->user()->id;
+                UserAttachment::create($newFile);
+            }
+            return [];
+        });
+    }
+
+
+    @js(export const openApiUrl = (pathFile: string): void => {
+  const baseApiUrl: string = import.meta.env.VITE_API_BASE_URL
+  const baseApi = baseApiUrl.split('/api')[0]
+
+  const urlFile = `${baseApi}/${pathFile}`
+
+  // Crea un elemento <a> y dispara el evento de clic para iniciar la descarga
+  const link = document.createElement('a')
+
+  link.href = urlFile
+  link.setAttribute('download', '')
+
+  // Para descargar archivos en la misma pestaña del navegador:
+  link.target = '_blank'
+
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+})
+
+
+------------------------------------------------------------------------------------------------
+
+navigator.geolocation.getCurrentPosition(
+  (pos) => {
+    console.log("Lat:", pos.coords.latitude);
+    console.log("Lng:", pos.coords.longitude);
+    console.log("Precisión estimada:", pos.coords.accuracy, "metros");
+  },
+  (err) => {
+    console.error("Error:", err.message);
+  },
+  {
+    enableHighAccuracy: true, // 🚀 intenta usar GPS en móviles
+    timeout: 10000,           // tiempo máximo de espera
+    maximumAge: 0             // no usar caché
+  }
+);
+
 <!DOCTYPE html>
 <html lang="en">
 
