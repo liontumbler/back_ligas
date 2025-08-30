@@ -25,7 +25,7 @@ abstract class Controller
 
     public function show($id)
     {
-        return $this->logicaNegocio->store($id);
+        return $this->logicaNegocio->show($id);
     }
 
     public function update(Request $request, $id)

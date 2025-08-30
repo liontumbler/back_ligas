@@ -10,7 +10,7 @@ use App\Http\Controllers\Api\V1\EntrenosController;
 use App\Http\Controllers\Api\V1\MenusController;
 use App\Http\Controllers\Api\V1\PagosController;
 use App\Http\Controllers\Api\V1\RolesController;
-use App\Http\Controllers\Api\V1\Permi;
+use App\Http\Controllers\Api\V1\PermisosRolController;
 
 Route::middleware(['JWT'])->group(function () {
     Route::apiResource('licencias', LicenciasController::class);
@@ -21,7 +21,9 @@ Route::middleware(['JWT'])->group(function () {
     Route::apiResource('menus', MenusController::class);
     Route::apiResource('pagos', PagosController::class);
     Route::apiResource('roles', RolesController::class);
-    Route::apiResource('permiso-rol', RolesController::class);
+    Route::apiResource('permiso-rol', PermisosRolController::class);
+
+    Route::post('permiso-rol/menus/{idRol}', [PermisosRolController::class, 'permisosUsuario']);
 });
 
 Route::post('login', [UsuariosController::class, 'login']);

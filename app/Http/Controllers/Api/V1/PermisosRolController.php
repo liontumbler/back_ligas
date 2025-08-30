@@ -15,4 +15,9 @@ class PermisosRolController extends Controller
     {
         parent::__construct(new PermisoRolLogicaNegocio());
     }
+
+    public function permisosUsuario(Request $request, $idRol)
+    {
+        return $this->logicaNegocio->permisosUsuario($request, $idRol);
+    }
 }

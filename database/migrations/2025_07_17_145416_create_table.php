@@ -110,6 +110,7 @@ return new class extends Migration
         Schema::create('menus', function (Blueprint $table) {
             $table->id();
             $table->string('nombre', 100);
+            $table->integer('orden');
             $table->string('url', 255)->nullable();
             $table->foreignId('parent_id')->nullable()->constrained('menus')->onDelete('cascade');
             $table->foreignId('usuario_creacion')->nullable()->constrained('usuarios');
@@ -120,7 +121,7 @@ return new class extends Migration
 
         Schema::create('permisos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('menu_id')->constrained('menus')->onDelete('cascade');
+            $table->foreignId('menu_id')->nullable()->constrained('menus')->onDelete('cascade');
             $table->enum('action', ['view', 'create', 'update', 'delete', 'read']);
             $table->foreignId('usuario_creacion')->nullable()->constrained('usuarios');
             $table->foreignId('usuario_modificacion')->nullable()->constrained('usuarios');

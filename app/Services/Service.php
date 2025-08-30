@@ -28,7 +28,7 @@ class Service
 
     public function todo($usuario, $ordenar, $tamaño = 0, $buscar = null)
     {
-        $Licencias = $this->model::where(function ($query) use ($usuario) {
+        $tabla = $this->model::where(function ($query) use ($usuario) {
             $query->where('usuario_creacion', $usuario->id)
                 ->orWhere('usuario_modificacion', $usuario->id);
         });
@@ -36,7 +36,7 @@ class Service
         $allowedColumns = $this->allowedColumns;
 
         if (!empty($buscar)) {
-            $Licencias->where(function ($q) use ($buscar, $allowedColumns) {
+            $tabla->where(function ($q) use ($buscar, $allowedColumns) {
                 foreach ($allowedColumns as $columna) {
                     $q->orWhere($columna, 'ILIKE', "%{$buscar}%");
                 }
@@ -47,14 +47,14 @@ class Service
         foreach ($sorts as $sort) {
             [$column, $direction] = explode(':', $sort) + [null, 'asc'];
             if (in_array($column, $allowedColumns) && in_array(strtolower($direction), ['asc', 'desc'])) {
-                $Licencias->orderBy($column, $direction);
+                $tabla->orderBy($column, $direction);
             }
         }
 
-        return $Licencias->paginate($tamaño);
+        return $tabla->paginate($tamaño);
         // return $tamaño > 0
-        //     ? $Licencias->paginate($tamaño)
-        //     : $Licencias->get();
-        //return Licencias::all();
+        //     ? $tabla->paginate($tamaño)
+        //     : $tabla->get();
+        //return tabla::all();
     }
 }

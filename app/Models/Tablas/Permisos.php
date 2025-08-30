@@ -24,7 +24,7 @@ class Permisos extends Model
 
     public function menu()
     {
-        return $this->belongsTo(Menus::class);
+        return $this->belongsTo(Menus::class, 'menu_id');
     }
 
     public function roles()

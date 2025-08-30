@@ -20,4 +20,9 @@ class PermisoRolLogicaNegocio extends LogicaNegocio
     {
         parent::__construct(new PermisoRolService(), $this->reglaCrear, $this->reglaActualizar);
     }
+
+    public function permisosUsuario($request, $idRol)
+    {
+        return $this->service->permisosUsuario($idRol);
+    }
 }

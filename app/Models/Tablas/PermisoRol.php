@@ -17,14 +17,14 @@ class PermisoRol extends Model
 
     protected $fillable = ['rol_id', 'permiso_id'];
 
-    public function rol(): BelongsTo
+    public function rol()
     {
-        return $this->belongsTo(Rol::class);
+        return $this->belongsTo(Rol::class, 'rol_id');
     }
 
-    public function permiso(): BelongsTo
+    public function permiso()
     {
-        return $this->belongsTo(Permiso::class);
+        return $this->belongsTo(Permiso::class, 'permiso_id');
     }
 
         public function creador()

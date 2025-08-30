@@ -2,14 +2,15 @@
 
 namespace App\Services;
 
-use App\Models\Tablas\Permisos;
+use App\Models\Tablas\PermisoRol;
+use App\Models\Tablas\Roles;
 
-class PermisoService extends Service
+class PermisoRolService extends Service
 {
     protected $allowedColumns = ['rol_id', 'permiso_id'];
 
     public function __construct() {
-        parent::__construct(Clientes::class, $this->allowedColumns);
+        parent::__construct(PermisoRol::class, $this->allowedColumns);
     }
 
     public function armarCuerpo($objetoCliente, $array) {
@@ -19,7 +20,7 @@ class PermisoService extends Service
 
     public function crear(array $array, $usuario = null)
     {
-        $objetoCliente = new Clientes();
+        $objetoCliente = new PermisoRol();
         $this->armarCuerpo($objetoCliente, $array);
         isset($usuario) ? $objetoCliente->usuario_creacion = $usuario->id : null;
         $objetoCliente->save();
@@ -29,7 +30,7 @@ class PermisoService extends Service
 
     public function actualizar($id, array $array, $usuario = null)
     {
-        $objetoCliente = Clientes::find($id);
+        $objetoCliente = PermisoRol::find($id);
         $this->armarCuerpo($objetoCliente, $array);
         isset($usuario) ? $objetoCliente->usuario_modificacion = $usuario->id : null;
         $objetoCliente->save();
@@ -37,115 +38,102 @@ class PermisoService extends Service
         return $objetoCliente;
     }
 
-    public function crearPermiso(array $array, $usuario = null)
+    private function buildMenuArray($menu, $permiso)
     {
-        $objetoPermiso = new Permisos();
-        $objetoPermiso->menu_id = $array['menu_id'];
-        $objetoPermiso->action = $array['action'];
-
-        isset($usuario) ? $objetoPermiso->usuario_creacion = $usuario->id : null;
-
-        $objetoPermiso->save();
-
-        return $objetoPermiso;
+        return [
+            'id' => $menu->id,
+            'menu' => $menu->nombre,
+            'permisos' => [$permiso->action],
+            'url' => $menu->url
+        ];
     }
 
-    public function actualizarPermiso($id, array $array, $usuario = null)
+
+    function permisosUsuario($idRol)
     {
-        $objetoPermiso = Permisos::find($id);
-        isset($array['menu_id']) ? $objetoPermiso->menu_id = $array['menu_id'] : null;
-        isset($array['action']) ? $objetoPermiso->action = $array['action'] : null;
-        isset($usuario) ? $objetoPermiso->usuario_modificacion = $usuario->id : null;
-        $objetoPermiso->save();
-
-        return $objetoPermiso;
-    }
-
-    public function eliminarPermiso($id)
-    {
-        $objetoPermiso = Permisos::find($id);
-        if ($objetoPermiso) {
-            $objetoPermiso->delete();
-        }
-
-        return $objetoPermiso;
-    }
-
-    public function todo($ordenar, $tamaño = 0, $buscar = null)
-    {
-        $Permisos = Permisos::query();
-        $allowedColumns = ['action'];
-
-        if (!empty($buscar)) {
-            $Permisos->where(function ($q) use ($buscar, $allowedColumns) {
-                foreach ($allowedColumns as $columna) {
-                    $q->orWhere($columna, 'ILIKE', "%{$buscar}%");
-                }
-            });
-        }
-
-        $sorts = explode(',', $ordenar);
-        foreach ($sorts as $sort) {
-            [$column, $direction] = explode(':', $sort) + [null, 'asc'];
-            if (in_array($column, $allowedColumns) && in_array(strtolower($direction), ['asc', 'desc'])) {
-                $Permisos->orderBy($column, $direction);
-            }
-        }
-
-        return $Permisos->paginate($tamaño);
-        //return Permisos::all();
-    }
-
-    public function obtenerXId($id)
-    {
-        return Permisos::find($id);
-    }
-
-    function permisosUsuario($usuario)
-    {
-        $permisos = $usuario->role
-            ->permissions()
-            ->with('menu.parent')
-            ->get();
+        $rol = Roles::find($idRol);
+        $permisos = $rol->permisos;
 
         $agrupados = [];
+        $menusById = [];
+
+        // 1. Recolectar menús
         foreach ($permisos as $permiso) {
-            $menu = $permiso->menu;
-            $padre = $menu->parent;
+            $idMenu = $permiso->menu_id;
 
-            if ($padre) {
-                $clave = $padre->id;
-
-                if (!isset($agrupados[$clave])) {
-                    $agrupados[$clave] = [
-                        'menu' => $padre->name,
-                        'action' => null,
-                        'parent_menu' => null,
-                        'menus' => [],
-                    ];
-                }
-
-                $agrupados[$clave]['menus'][] = [
-                    'menu' => $menu->name,
-                    'action' => $permiso->action,
+            if ($idMenu) {
+                $menu = $permiso->menu;
+                $menusById[$menu->id] = [
+                    'id'        => $menu->id,
+                    'nombre'    => $menu->nombre,
+                    'orden'     => $menu->orden,
+                    'url'       => $menu->url,
+                    'parent_id' => $menu->parent_id,
+                    'menus'     => []
                 ];
             } else {
-                $clave = $menu->id;
-
-                if (!isset($agrupados[$clave])) {
-                    $agrupados[$clave] = [
-                        'menu' => $menu->name,
-                        'action' => null,
-                        'menus' => [],
-                    ];
-                }
-
-                if ($agrupados[$clave]['action'] === null) {
-                    $agrupados[$clave]['action'] = $permiso->action;
-                }
+                $agrupados['permisos-globales'][] = $permiso->action;
             }
         }
 
+        // 2. Construir árbol con helper
+        $tree = $this->buildTree($menusById);
+
+        // 3. Ordenar árbol completo
+        $this->sortMenus($tree);
+
+       // 4. Asignar permisos con el path completo
+        foreach ($permisos as $permiso) {
+            if ($permiso->menu_id && isset($menusById[$permiso->menu_id])) {
+                $menuPath = $this->buildMenuPath($menusById[$permiso->menu_id], $menusById);
+                $menusById[$permiso->menu_id]['permiso'] = $menuPath . '.' . $permiso->action;
+            }
+        }
+
+        // 4. Asignar al resultado final
+        $agrupados['menus'] = $tree;
+
         return $agrupados;
+    }
+
+    public function buildTree(array &$menusById): array
+    {
+        $tree = [];
+
+        foreach ($menusById as $id => &$menu) {
+            if ($menu['parent_id'] && isset($menusById[$menu['parent_id']])) {
+                // Si tiene padre, se agrega como hijo
+                $menusById[$menu['parent_id']]['menus'][] = &$menu;
+            } else {
+                // Si no tiene padre, es raíz
+                $tree[] = &$menu;
+            }
+        }
+
+        return $tree;
+    }
+
+    public function sortMenus(array &$menus): void
+    {
+        usort($menus, fn($a, $b) => $a['orden'] <=> $b['orden']);
+
+        foreach ($menus as &$submenu) {
+            if (!empty($submenu['menus'])) {
+                self::sortMenus($submenu['menus']);
+            }
+        }
+    }
+
+    public function buildMenuPath($menu, $menusById): string
+    {
+        $path = [$menu['nombre']];
+        $parentId = $menu['parent_id'];
+
+        while ($parentId && isset($menusById[$parentId])) {
+            array_unshift($path, $menusById[$parentId]['nombre']); // lo metemos al inicio
+            $parentId = $menusById[$parentId]['parent_id'];
+        }
+
+        return implode('.', $path);
     }
 }
