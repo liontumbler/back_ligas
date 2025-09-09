@@ -21,13 +21,14 @@ class initSeeder extends Seeder
         ]);
 
         DB::table('menus')->insert([
-            ['id' => 1, 'orden' => 1, 'nombre' => 'dashboard', 'parent_id' => null, 'url' => '/dashboard'],
-            ['id' => 2, 'orden' => 2, 'nombre' => 'configuración', 'parent_id' => null, 'url' => null],
-            ['id' => 3, 'orden' => 3, 'nombre' => 'usuarios', 'parent_id' => 2, 'url' => '/usuarios'],
-            ['id' => 4, 'orden' => 4, 'nombre' => 'licencias', 'parent_id' => 2, 'url' => '/licencias'],
-            ['id' => 5, 'orden' => 5, 'nombre' => 'roles', 'parent_id' => 2, 'url' => '/roles'],
-            ['id' => 6, 'orden' => 6, 'nombre' => 'clientes', 'parent_id' => 2, 'url' => '/clientes'],
-            ['id' => 7, 'orden' => 1, 'nombre' => 'ligas', 'parent_id' => null, 'url' => '/ligas'],
+            ['id' => 1, 'orden' => 1, 'nombre' => 'dashboard', 'parent_id' => null],
+            ['id' => 2, 'orden' => 2, 'nombre' => 'configuracion', 'parent_id' => null],
+            ['id' => 3, 'orden' => 3, 'nombre' => 'usuarios', 'parent_id' => 2],
+            ['id' => 4, 'orden' => 4, 'nombre' => 'licencias', 'parent_id' => 2],
+            ['id' => 5, 'orden' => 5, 'nombre' => 'roles', 'parent_id' => 2],
+            ['id' => 6, 'orden' => 6, 'nombre' => 'clientes', 'parent_id' => 2],
+            ['id' => 7, 'orden' => 1, 'nombre' => 'ligas', 'parent_id' => null],
+            ['id' => 8, 'orden' => 1, 'nombre' => 'liga', 'parent_id' => null],
         ]);
 
         DB::table('usuarios')->insert([
@@ -77,6 +78,7 @@ class initSeeder extends Seeder
             ['id' => 4, 'menu_id' => 2, 'action' => 'view'],     // Configuración
             ['id' => 5, 'menu_id' => 3, 'action' => 'view'],
             ['id' => 6, 'menu_id' => 4, 'action' => 'view'],
+            ['id' => 7, 'menu_id' => 8, 'action' => 'view'],
         ]);
 
         DB::table('permiso_rol')->insert([
@@ -86,6 +88,7 @@ class initSeeder extends Seeder
             ['rol_id' => 1, 'permiso_id' => 4],
             ['rol_id' => 1, 'permiso_id' => 5],
             ['rol_id' => 1, 'permiso_id' => 6],
+            ['rol_id' => 1, 'permiso_id' => 7],
             ['rol_id' => 2, 'permiso_id' => 1],
             ['rol_id' => 2, 'permiso_id' => 3],
         ]);

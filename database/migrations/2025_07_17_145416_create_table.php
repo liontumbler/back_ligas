@@ -111,7 +111,6 @@ return new class extends Migration
             $table->id();
             $table->string('nombre', 100);
             $table->integer('orden');
-            $table->string('url', 255)->nullable();
             $table->foreignId('parent_id')->nullable()->constrained('menus')->onDelete('cascade');
             $table->foreignId('usuario_creacion')->nullable()->constrained('usuarios');
             $table->foreignId('usuario_modificacion')->nullable()->constrained('usuarios');
