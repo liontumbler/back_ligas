@@ -9,29 +9,19 @@ class RouteGeneratorService
     public static function crearRutaYControlador(string $urlExterna, string $urlInterna, string $metodo, string $nombreControlador)
     {
         $controllerName = ucfirst($nombreControlador) . 'Controller';
-        $controllerPath = app_path("Http/Controllers/ControllerGenerate/{$controllerName}.php");
+        $folder = app_path('Http/Controllers/ControllerGenerate');
+        $controllerPath = app_path("{$folder}/{$controllerName}.php");
 
         $metodo = strtoupper($metodo);
         $metodoMin = strtolower($metodo);
         $nombreMetodo = $metodoMin . 'Handler';
 
-        $service = '';
-        if (strtoupper($metodo) === 'GET') {
-            // GET → enviar query params
-            $service = 
-<<<PHP
-\$response = \$http->get('{$urlInterna}', \$request->query());
-PHP;
-        } else {
-            // POST, PUT, PATCH, DELETE → enviar cuerpo tal cual
-            $service = 
-<<<PHP
-\$response = \$http->withBody(
-    \$request->getContent(),
-    \$request->header('Content-Type', 'application/json')
-)->send(\$metodo, '{$urlInterna}');
-PHP;
+        if (!File::exists($folder)) {
+            File::makeDirectory($folder, 0755, true);
+            // echo "📁 Carpeta creada: {$folder}\n";
         }
+
+        $service = $this->generateService($metodo, $urlInterna);
 
         // 🔧 Código del método dinámico que reenvía la petición tal cual
         $nuevoMetodo = 
@@ -94,6 +84,28 @@ PHP;
             'ruta' => $routeFile,
             'mensaje' => "✅ Método {$nombreMetodo} agregado (si no existía) en {$controllerName} y ruta '{$urlExterna}' creada correctamente."
         ];
+    }
+
+    private function generateService($metodo, $urlInterna) {
+        $service = '';
+        if (strtoupper($metodo) === 'GET') {
+            // GET → enviar query params
+            $service = 
+<<<PHP
+\$response = \$http->get('{$urlInterna}', \$request->query());
+PHP;
+        } else {
+            // POST, PUT, PATCH, DELETE → enviar cuerpo tal cual
+            $service = 
+<<<PHP
+\$response = \$http->withBody(
+    \$request->getContent(),
+    \$request->header('Content-Type', 'application/json')
+)->send(\$metodo, '{$urlInterna}');
+PHP;
+        }
+
+        return $service;
     }
 
     public static function eliminarRutaYControlador(string $metodo, string $nombreControlador)
