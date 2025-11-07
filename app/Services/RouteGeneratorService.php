@@ -52,7 +52,7 @@ class RouteGeneratorService
             $contenido = $this->generateController($controllerName, $nuevoMetodo);
             File::put($controllerPath, $contenido);
         } else {
-            File::copy($controllerPath, $controllerPath . '.bak.' . time());
+            File::copy($controllerPath, $this->backupDir . "/{$controllerName}.php" . '.bak.' . time());
             // 2️⃣ Si el controlador existe → solo agregar el método si no existe
             $contenido = File::get($controllerPath);
 
@@ -63,13 +63,27 @@ class RouteGeneratorService
             }
         }
 
+        $routeBaseFolder = base_path('routes');
+        $controllerRouteFolder = "{$routeBaseFolder}/{$controllerName}";
+        if (!File::exists($controllerRouteFolder)) {
+            File::makeDirectory($controllerRouteFolder, 0755, true);
+        }
+
+        $routeFile = "{$controllerRouteFolder}/{$controllerName}Route.php";
+
         //$routeDefinition = "\nRoute::" . $metodoMin . "('{$urlExterna}', [\\App\\Http\\Controllers\\ControllerGenerate\\{$controllerName}::class, '{$nombreMetodo}']);\n";
         $routeDefinition = "\nRoute::" . $metodoMin . "('{$urlExterna}', '\\App\\Http\\Controllers\\ControllerGenerate\\{$controllerName}@{$nombreMetodo}');\n";
 
-        $routeFile = base_path('routes/api.php');
-        $rutas = File::get($routeFile);
-        if (strpos($rutas, "Route::$metodoMin('$urlExterna'") === false) {
-            File::append($routeFile, $routeDefinition);
+        if (!File::exists($routeFile)) {
+            $contenido = "<?php\n\nuse Illuminate\Support\Facades\Route;\n\n";
+            $contenido .= $routeDefinition;
+            File::put($routeFile, $contenido);
+        } else {
+            // Agregar la ruta solo si no existe
+            $rutas = File::get($routeFile);
+            if (strpos($rutas, "Route::{$metodoMin}('{$urlExterna}'") === false) {
+                File::append($routeFile, $routeDefinition);
+            }
         }
 
         return [
