@@ -11,6 +11,8 @@ use App\Http\Controllers\Api\V1\MenusController;
 use App\Http\Controllers\Api\V1\PagosController;
 use App\Http\Controllers\Api\V1\RolesController;
 use App\Http\Controllers\Api\V1\PermisosRolController;
+use App\Services\RouteGeneratorService;
+use Illuminate\Support\Facades\Request;
 
 Route::middleware(['JWT'])->group(function () {
     Route::apiResource('licencias', LicenciasController::class);
@@ -37,3 +39,13 @@ Route::post('refresh-token', [UsuariosController::class, 'refreshToken']);
 // Route::put('ligas/{liga}', [LigasController::class, 'update']); // Actualizar recurso completo
 // Route::patch('ligas/{liga}', [LigasController::class, 'update']); // Actualizar parcialmente
 // Route::delete('ligas/{liga}', [LigasController::class, 'destroy']); // Eliminar recurso
+
+Route::get('/create', function (Request $request) {
+    $RouteGenerator = new RouteGeneratorService();
+    return $RouteGenerator->crearRutaYControlador('/url-externa', 'https://api.bigdatacloud.net/data/reverse-geocode-client', 'get', 'controlador', ['latitude', 'longitude']/*, ['Authorization' => 'Bearer 123', 'X-From' => 'Middleware']*/);
+});
+
+Route::get('/elimina', function (Request $request) {
+    $RouteGenerator = new RouteGeneratorService();
+    return $RouteGenerator->eliminarRutaYControlador('get', 'controlador');
+});
