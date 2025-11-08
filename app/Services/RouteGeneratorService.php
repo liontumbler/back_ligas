@@ -10,30 +10,30 @@ class RouteGeneratorService
     protected $dir;
 
     public function __construct() {
-        $this->backupDir = app_path('Http/Controllers/ControllerGenerate/backup');
-        $this->dir = app_path('Http/Controllers/ControllerGenerate');
+        $this->backupDir = 'Http/Controllers/ControllerGenerate/backup';
+        $this->dir = 'Http/Controllers/ControllerGenerate';
     }
 
-    public function crearRutaYControlador(string $urlExterna, string $urlInterna, string $metodo, string $nombreControlador, array  $variables, array $headers = [])
+    public function crearRutaYControlador(string $urlExterna, string $urlInterna, string $metodo, string $nombreControlador, array  $variables = [], array $headers = [])
     {
         if (!preg_match('/^[A-Za-z0-9_-]+$/', $nombreControlador)) {
-            throw new \InvalidArgumentException("Nombre de controlador inválido");
+            throw new \Exception("Nombre de controlador inválido");
         }
         
         if (!in_array(strtoupper($metodo), ['GET', 'POST', 'PUT', 'DELETE'])) {
-            throw new \InvalidArgumentException("Método HTTP no permitido");
+            throw new \Exception("Método HTTP no permitido");
         }
 
-        if (!$this->isSafeHttpUrl($urlExterna)) {
-            throw new \InvalidArgumentException("URL externa inválida");
+        // if (!$this->isSafeHttpUrl($urlExterna)) {
+        //     throw new \Exception("URL externa inválida");
+        // }
+
+        if (!File::exists(app_path($this->dir))) {
+            File::makeDirectory(app_path($this->dir), 0755, true);
         }
 
-        if (!File::exists($this->dir)) {
-            File::makeDirectory($this->dir, 0755, true);
-        }
-
-        if (!File::exists($this->backupDir)) {
-            File::makeDirectory($this->backupDir, 0755, true);
+        if (!File::exists(app_path($this->backupDir))) {
+            File::makeDirectory(app_path($this->backupDir), 0755, true);
         }
 
         $metodo = strtoupper($metodo);
@@ -46,13 +46,14 @@ class RouteGeneratorService
 
         $controllerName = ucfirst($nombreControlador) . 'Controller';
         $controllerPath = app_path("{$this->dir}/{$controllerName}.php");
-
+        
         // 1️⃣ Si el controlador NO existe → crear clase completa
         if (!File::exists($controllerPath)) {
             $contenido = $this->generateController($controllerName, $nuevoMetodo);
+            //return "{$this->dir}/{$controllerName}.php";
             File::put($controllerPath, $contenido);
         } else {
-            File::copy($controllerPath, $this->backupDir . "/{$controllerName}.php" . '.bak.' . time());
+            File::copy($controllerPath, app_path($this->backupDir . "/{$controllerName}.php" . '.bak.' . time()));
             // 2️⃣ Si el controlador existe → solo agregar el método si no existe
             $contenido = File::get($controllerPath);
 
@@ -69,11 +70,8 @@ class RouteGeneratorService
             File::makeDirectory($controllerRouteFolder, 0755, true);
         }
 
+        $routeDefinition = "\nRoute::" . $metodoMin . "('{$urlExterna}', [\\App\\Http\\Controllers\\ControllerGenerate\\{$controllerName}::class, '{$nombreMetodo}']);\n";
         $routeFile = "{$controllerRouteFolder}/{$controllerName}Route.php";
-
-        //$routeDefinition = "\nRoute::" . $metodoMin . "('{$urlExterna}', [\\App\\Http\\Controllers\\ControllerGenerate\\{$controllerName}::class, '{$nombreMetodo}']);\n";
-        $routeDefinition = "\nRoute::" . $metodoMin . "('{$urlExterna}', '\\App\\Http\\Controllers\\ControllerGenerate\\{$controllerName}@{$nombreMetodo}');\n";
-
         if (!File::exists($routeFile)) {
             $contenido = "<?php\n\nuse Illuminate\Support\Facades\Route;\n\n";
             $contenido .= $routeDefinition;
@@ -84,6 +82,33 @@ class RouteGeneratorService
             if (strpos($rutas, "Route::{$metodoMin}('{$urlExterna}'") === false) {
                 File::append($routeFile, $routeDefinition);
             }
+        }
+
+        $serviceProviderPath = app_path('Providers/AppServiceProvider.php');
+
+        // Verificar que exista
+        if (!File::exists($serviceProviderPath)) {
+            throw new \Exception("No se encontró AppServiceProvider.php en app/Providers");
+        }
+
+        $contenido = File::get($serviceProviderPath);
+        $nuevaLinea = "\n        \$this->loadRoutesFrom(base_path('routes/{$controllerName}/{$controllerName}Route.php'));";
+
+        // Solo agregamos si no existe aún
+        if (!str_contains($contenido, "routes/{$controllerName}/{$controllerName}Route.php")) {
+            // Asegurar que tenga método boot()
+            if (!preg_match('/public function boot\s*\(\)\s*:\s*void\s*\{/', $contenido)) {
+                throw new \Exception("El método boot() no fue encontrado en AppServiceProvider");
+            }
+
+            // Insertar antes de la última llave del método boot()
+            $contenido = preg_replace(
+                '/(public function boot\s*\(\)\s*:\s*void\s*\{)(.*?)(\n\s*\})/s',
+                '$1$2' . $nuevaLinea . '$3',
+                $contenido
+            );
+
+            File::put($serviceProviderPath, $contenido);
         }
 
         return [
@@ -102,38 +127,44 @@ class RouteGeneratorService
             $headersCode = 
 <<<PHP
 collect(\$request->headers->all())
-    // ->reject(fn(\$v, \$k) => in_array(strtolower(\$k), ['host', 'content-length'])) // opcional: filtrar
-    ->mapWithKeys(fn(\$v, \$k) => [\$k => is_array(\$v) ? implode(', ', \$v) : \$v])
-    ->toArray();
+        // ->reject(fn(\$v, \$k) => in_array(strtolower(\$k), ['host', 'content-length'])) // opcional: filtrar
+        ->mapWithKeys(fn(\$v, \$k) => [\$k => is_array(\$v) ? implode(', ', \$v) : \$v])
+        ->toArray();
 PHP;
         }
         return $headersCode;
     }
 
     private function generateFunction($nombreMetodo, $service, array $variables) {
-        $variablesCode = var_export($variables, true);
-        return 
+        $validate = 
 <<<PHP
-    public function {$nombreMetodo}(Request \$request)
-    {
-        \$http = Http::withHeaders(\$headers);
+return response()->json(json_decode(\$response->body()), \$response->status());
+PHP;
+        if (count($variables)) {
+            $variablesCode = var_export($variables, true);
+            $validate = 
+<<<PHP
+// Decodificar el cuerpo de la respuesta
+    \$data = json_decode(\$response->body(), true);
+    \$variables = {$variablesCode};
 
-        {$service}
+    // Crear un arreglo filtrado solo con las variables especificadas
+    \$filteredData = [];
+    foreach (\$variables as \$var) {
+        \$filteredData[\$var] = \$data[\$var] ?? null;
+    }
 
-        // Decodificar el cuerpo de la respuesta
-        \$data = json_decode(\$response->body(), true);
-        \$variables = {$variablesCode};
-
-        // Crear un arreglo filtrado solo con las variables especificadas
-        \$filteredData = [];
-        foreach (\$variables as \$var) {
-            \$filteredData[\$var] = \$data[\$var] ?? null;
+    return response()->json(json_decode(\$filteredData), \$response->status());
+PHP;
         }
         
-        return response()->json(\$filteredData, \$response->status());
+        return 
+<<<PHP
+public function {$nombreMetodo}(Request \$request)
+    {
+        {$service}
 
-        // return response(\$response->body(), \$response->status())
-        //     ->header('Content-Type', \$response->header('Content-Type', 'application/json'));
+        {$validate}
     }
 PHP;
     }
@@ -148,7 +179,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\\Http\\Request;
 use Illuminate\\Support\\Facades\\Http;
 
-class {$controllerName} extends Controller
+class {$controllerName} //extends Controller
 {
     {$nuevoMetodo}
 }
@@ -162,75 +193,97 @@ PHP;
             $service = 
 <<<PHP
 \$headers = {$headers}
-
-\$response = \$http->get('{$urlInterna}', \$request->query());
+        \$http = Http::withHeaders(\$headers);
+        \$response = \$http->get('{$urlInterna}', \$request->query());
 PHP;
         } else {
             // POST, PUT, PATCH, DELETE → enviar cuerpo tal cual
             $service = 
 <<<PHP
 \$headers = {$headers}
-
-\$response = \$http->withBody(
-    \$request->getContent(),
-    \$request->header('Content-Type', 'application/json')
-)->send(\$metodo, '{$urlInterna}');
+        \$http = Http::withHeaders(\$headers);
+        \$response = \$http->withBody(
+            \$request->getContent(),
+            \$request->header('Content-Type', 'application/json')
+        )->send(\$metodo, '{$urlInterna}');
 PHP;
         }
 
         return $service;
     }
 
-    public function eliminarRutaYControlador(string $metodo, string $nombreControlador)
+    public function eliminarControladorYRuta(string $nombreControlador, string $metodo)
     {
+        $nombreMetodo = strtolower($metodo) . 'Handler';
         $controllerName = ucfirst($nombreControlador) . 'Controller';
         $controllerPath = app_path("{$this->dir}/{$controllerName}.php");
-        $metodo = strtoupper($metodo);
-        $nombreMetodo = strtolower($metodo) . 'Handler';
+        $controllerRouteFolder = base_path("routes/{$controllerName}");
+        $routeFile = "{$controllerRouteFolder}/{$controllerName}Route.php";
+        $providerPath = app_path('Providers/AppServiceProvider.php');
 
-        // 1️⃣ Verificar que el controlador exista
-        if (!File::exists($controllerPath)) {
-            throw new \Exception("❌ El controlador {$controllerName} no existe.");
-        }
-
-        $contenido = File::get($controllerPath);
-
-        // 2️⃣ Buscar el método dentro del controlador
-        $pattern = "/public function {$nombreMetodo}\s*\(.*?\)\s*\{.*?\n\s*\}/s";
-
-        if (!preg_match($pattern, $contenido)) {
-            throw new \Exception("❌ El método {$nombreMetodo} no existe en {$controllerName}.");
-        }
-
-        // 3️⃣ Eliminar el método del controlador
-        $nuevoContenido = preg_replace($pattern, '', $contenido);
-
-        File::put($controllerPath, $nuevoContenido);
-
-        // 4️⃣ Buscar y eliminar la ruta correspondiente en routes/api.php
-        $routeFile = base_path('routes/api.php');
-        if (!File::exists($routeFile)) {
-            throw new \Exception("❌ El archivo de rutas 'routes/api.php' no existe.");
-        }
-
-        $rutas = File::get($routeFile);
-
-        // Patrón para eliminar la ruta asociada a ese controlador/método
-        $routePattern = "/Route::" . strtolower($metodo) . "\(.*{$controllerName}::class.*'{$nombreMetodo}'.*\);\s*/";
-
-        if (!preg_match($routePattern, $rutas)) {
-            throw new \Exception("❌ No se encontró ninguna ruta asociada a {$controllerName}::{$nombreMetodo}.");
-        }
-
-        $rutasActualizadas = preg_replace($routePattern, '', $rutas);
-
-        File::put($routeFile, $rutasActualizadas);
-
-        return [
-            'controlador' => $controllerPath,
-            'ruta' => $routeFile,
-            'mensaje' => "✅ Se eliminó correctamente el método {$nombreMetodo} de {$controllerName} y su ruta asociada."
+        $result = [
+            'controlador' => false,
+            'ruta' => false,
+            'provider' => false,
+            'mensaje' => [],
         ];
+
+        // 🧹 1️⃣ Eliminar método del controlador (o el archivo si no queda nada)
+        if (File::exists($controllerPath)) {
+            $contenido = File::get($controllerPath);
+            $pattern = "/public function {$nombreMetodo}\s*\([^}]*\}\s*/s";
+
+            if (preg_match($pattern, $contenido)) {
+                $nuevoContenido = preg_replace($pattern, '', $contenido);
+                // Si el archivo queda sin métodos propios → eliminar todo el controlador
+                if (!preg_match('/public function\s+\w+\s*\(/', $nuevoContenido)) {
+                    File::delete($controllerPath);
+                    $result['mensaje'][] = "🗑 Controlador {$controllerName} eliminado (sin métodos restantes).";
+                } else {
+                    File::put($controllerPath, $nuevoContenido);
+                    $result['mensaje'][] = "🧹 Método {$nombreMetodo} eliminado de {$controllerName}.";
+                }
+                $result['controlador'] = true;
+            }
+        }
+
+        // 🧭 2️⃣ Eliminar la ruta asociada
+        if (File::exists($routeFile)) {
+            $rutas = File::get($routeFile);
+            $patternRuta = "/Route::[a-z]+\('.*', \[.*{$nombreMetodo}.*\]\);\n?/";
+            $nuevoRutas = preg_replace($patternRuta, '', $rutas);
+
+            // Si el archivo queda vacío (solo cabecera), eliminarlo todo
+            if (trim($nuevoRutas) === "<?php\n\nuse Illuminate\Support\Facades\Route;") {
+                File::delete($routeFile);
+                File::deleteDirectory($controllerRouteFolder);
+                $result['mensaje'][] = "🗑 Archivo de ruta {$routeFile} eliminado (sin rutas restantes).";
+            } else {
+                File::put($routeFile, $nuevoRutas);
+                $result['mensaje'][] = "🧹 Ruta eliminada de {$routeFile}.";
+            }
+            $result['ruta'] = true;
+        }
+
+        // 🧩 3️⃣ Quitar la línea del provider
+        if (File::exists($providerPath)) {
+            
+            $contenidoProvider = File::get($providerPath);
+            //return $providerPath;
+            $patternProvider = '/\$this->loadRoutesFrom\s*\(\s*base_path\(["\']routes\/' . $controllerName . '\/' . $controllerName . 'Route\.php["\']\)\s*\)\s*;/';
+            if (preg_match($patternProvider, $contenidoProvider)) {
+                $nuevoProvider = preg_replace($patternProvider, '', $contenidoProvider);
+                File::put($providerPath, $nuevoProvider);
+                $result['mensaje'][] = "🧩 Línea del provider para {$controllerName} eliminada.";
+                $result['provider'] = true;
+            }
+        }
+
+        if (empty($result['mensaje'])) {
+            $result['mensaje'][] = "⚠️ No se encontró nada que eliminar para {$controllerName}::{$nombreMetodo}.";
+        }
+
+        return $result;
     }
 
     public function findMethodsInGeneratedControllers(string $filter = ''): array {
@@ -304,7 +357,7 @@ PHP;
     }
 
     private function isSafeHttpUrl(string $url): bool {
-        if (!$this->isValidUrl($url)) return false;
+        //if (!$this->isValidUrl($url)) return false;
         $parts = parse_url($url);
         return in_array(strtolower($parts['scheme'] ?? ''), ['http', 'https']);
     }

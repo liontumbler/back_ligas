@@ -17,7 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(ContentSecurityPolicy::class);
-        $middleware->append(VerificarLicenciaMiddleware::class);
+        //$middleware->append(VerificarLicenciaMiddleware::class);
         $middleware->alias([
             'JWT' => JwtMiddleware::class,
         ]);

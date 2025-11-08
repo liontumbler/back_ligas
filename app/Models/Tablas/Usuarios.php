@@ -39,7 +39,7 @@ class Usuarios extends Model
 
     protected $appends = [
         'rol_name',
-        'permisos_rol'
+        //'permisos_rol'
     ];
 
     public function getRolNameAttribute()
@@ -47,10 +47,10 @@ class Usuarios extends Model
         return $this->rol->nombre;
     }
 
-    public function getPermisosRolAttribute()
-    {
-        return $this->rol ? $this->rol->permisos : collect();
-    }
+    // public function getPermisosRolAttribute()
+    // {
+    //     return $this->rol ? $this->rol->permisos : collect();
+    // }
 
     public function liga()
     {

@@ -42,10 +42,11 @@ Route::post('refresh-token', [UsuariosController::class, 'refreshToken']);
 
 Route::get('/create', function (Request $request) {
     $RouteGenerator = new RouteGeneratorService();
-    return $RouteGenerator->crearRutaYControlador('/url-externa', 'https://api.bigdatacloud.net/data/reverse-geocode-client', 'get', 'controlador', ['latitude', 'longitude']/*, ['Authorization' => 'Bearer 123', 'X-From' => 'Middleware']*/);
+    return $RouteGenerator->crearRutaYControlador('/url-externa', 'https://api.bigdatacloud.net/data/reverse-geocode-client', 'get', 'controlador'/*, ['latitude', 'longitude']*//*, ['Authorization' => 'Bearer 123', 'X-From' => 'Middleware']*/);
+    // return 'edwin';
 });
 
 Route::get('/elimina', function (Request $request) {
     $RouteGenerator = new RouteGeneratorService();
-    return $RouteGenerator->eliminarRutaYControlador('get', 'controlador');
+    return $RouteGenerator->eliminarControladorYRuta('controlador', 'get');
 });

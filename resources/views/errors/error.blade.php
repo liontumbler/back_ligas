@@ -6,13 +6,13 @@
 
 @section('content')
 
-@vite(['resources/css/error.css'])
+<!-- @.  vite(['resources/css/error.css']) -->
 
 <div class="container container p-4 bg-dark rounded-bottom-3">
     <div class="row">
         <div class="col-lg-12">
-            <img src="{{ Vite::asset('resources/img/error.svg') }}" alt="Nocarga"
-                style="width: 291px; display: block; margin: auto;">
+            <!-- <img src="{ Vite:    :asset('resources/img/error.svg') }}" alt="Nocarga"
+                style="width: 291px; display: block; margin: auto;"> -->
         </div>
         <div class="col-lg-12">
             <h1 class="text-white text-center" style="font-size: calc(4.375rem + 1.5vw);">@yield('numberError')</h1>
