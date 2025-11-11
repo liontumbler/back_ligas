@@ -41,7 +41,7 @@ class ResourceStates
     {
         $os = strtolower(PHP_OS_FAMILY);
         if ($os === 'linux') {
-            // Linux: usa /proc/meminfo
+            // Linux
             $memInfo = [];
             foreach (file('/proc/meminfo') as $line) {
                 [$key, $val] = explode(':', $line);
@@ -51,33 +51,43 @@ class ResourceStates
             $total = (int) filter_var($memInfo['MemTotal'], FILTER_SANITIZE_NUMBER_INT);
             $available = (int) filter_var($memInfo['MemAvailable'], FILTER_SANITIZE_NUMBER_INT);
             $used = $total - $available;
-            $percent = ($used / $total) * 100;
-
-            $memory = [
-                'total_kb' => $total,
-                'used_kb' => $used,
-                'available_kb' => $available,
-                'percent' => round($percent, 2)
-            ];
         } elseif ($os === 'windows') {
-            // Windows: usa WMIC (herramienta del sistema)
+            // Windows
             $output = shell_exec('wmic OS get FreePhysicalMemory,TotalVisibleMemorySize /Value');
             preg_match_all('/(\w+)=([0-9]+)/', $output, $matches);
-
             $values = array_combine($matches[1], $matches[2]);
             $total = (int) $values['TotalVisibleMemorySize'];
             $free = (int) $values['FreePhysicalMemory'];
             $used = $total - $free;
-            $percent = ($used / $total) * 100;
+        } elseif ($os === 'darwin') {
+            // macOS
+            $output = shell_exec('vm_stat');
+            $pageSize = 4096;
+            $lines = explode("\n", trim($output));
+            $stats = [];
 
-            $memory = [
-                'total_kb' => $total,
-                'used_kb' => $used,
-                'free_kb' => $free,
-                'percent' => round($percent, 2)
-            ];
+            foreach ($lines as $line) {
+                if (preg_match('/^(.+):\s+([0-9]+)/', $line, $matches)) {
+                    $stats[trim($matches[1])] = (int) $matches[2];
+                }
+            }
+
+            $free = ($stats['Pages free'] + $stats['Pages speculative']) * $pageSize / 1024;
+            $active = $stats['Pages active'] * $pageSize / 1024;
+            $inactive = $stats['Pages inactive'] * $pageSize / 1024;
+            $wired = $stats['Pages wired down'] * $pageSize / 1024;
+            $total = $free + $active + $inactive + $wired;
+            $used = $active + $inactive + $wired;
         }
-        return $memory;
+
+        $percent = ($used / $total) * 100;
+
+        return [
+            'total_kb' => round($total),
+            'used_kb' => round($used),
+            'free_kb' => round($total - $used),
+            'percent' => round($percent, 2)
+        ];
     }
 
     public function getBestServer(): ?string
